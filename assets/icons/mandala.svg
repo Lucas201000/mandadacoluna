@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mandala da Dor na Coluna">
+  <circle cx="32" cy="32" r="29" fill="#fff"/>
+  <path d="M32 32 32 3A29 29 0 0 1 57 17.5Z" fill="#D84A4A"/>
+  <path d="M32 32 57 17.5A29 29 0 0 1 57 46.5Z" fill="#F2993A"/>
+  <path d="M32 32 57 46.5A29 29 0 0 1 32 61Z" fill="#55A85A"/>
+  <path d="M32 32 32 61A29 29 0 0 1 7 46.5Z" fill="#39A9B8"/>
+  <path d="M32 32 7 46.5A29 29 0 0 1 7 17.5Z" fill="#7A4FA3"/>
+  <path d="M32 32 7 17.5A29 29 0 0 1 32 3Z" fill="#3569B7"/>
+  <circle cx="32" cy="32" r="10" fill="#fff"/>
+  <path d="M30 19h4v11h7v4h-7v11h-4V34h-7v-4h7z" fill="#237A6B"/>
+</svg>
