@@ -34,7 +34,7 @@ export function mountLeadForm(result, onSuccess) {
     submit.textContent = 'Salvando com segurança...';
 
     try {
-      await saveLead(data, result);
+      const leadSave = await saveLead(data, result);
       trackEvent('lead_submitted');
       document.querySelector('#lead-gate').classList.add('hidden');
       onSuccess();
@@ -49,7 +49,9 @@ export function mountLeadForm(result, onSuccess) {
       // O relatório continua disponível mesmo se a Brevo estiver temporariamente indisponível.
       sendAssessmentEmail(result)
         .then(() => {
-          emailStatus.textContent = 'Enviamos uma confirmação para o seu e-mail.';
+          emailStatus.textContent = leadSave.remoteSaved === false
+            ? 'Enviamos uma confirmação para o seu e-mail e cadastramos seu contato na Brevo.'
+            : 'Enviamos uma confirmação para o seu e-mail.';
           trackEvent('assessment_email_sent');
         })
         .catch(error => {

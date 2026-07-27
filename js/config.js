@@ -38,13 +38,19 @@ export function trackEvent(eventName,eventData={}) { console.info('[Mandala anal
 export async function saveLead(leadData,assessmentData) {
   const payload={leadData,assessmentId:assessmentData.assessmentId,savedAt:new Date().toISOString()};
   localStorage.setItem('mandalaDorLeadV1',JSON.stringify(payload));
-  if(!window.supabase) throw new Error('Biblioteca do Supabase não foi carregada.');
+  if(!window.supabase) {
+    console.warn('Biblioteca do Supabase não foi carregada. O lead ficará disponível no dispositivo e na Brevo.');
+    return {...payload,remoteSaved:false};
+  }
   const client=window.supabase.createClient(SUPABASE_CONFIG.url,SUPABASE_CONFIG.publishableKey);
   const {error}=await client.from(SUPABASE_CONFIG.table).insert({
     assessment_id:assessmentData.assessmentId, first_name:leadData.name, email:leadData.email,
     whatsapp:leadData.whatsapp, marketing_consent:leadData.marketing, assessment:assessmentData
   });
-  if(error) throw error;
+  if(error) {
+    console.warn('Não foi possível salvar no Supabase. O lead ficará disponível no dispositivo e na Brevo.',error);
+    return {...payload,remoteSaved:false};
+  }
   console.info('[Mandala lead salvo no Supabase]',assessmentData.assessmentId);
-  return payload;
+  return {...payload,remoteSaved:true};
 }
