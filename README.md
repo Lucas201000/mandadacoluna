@@ -12,6 +12,8 @@ Abra `index.html` em um servidor local. Por exemplo, com a extensão Live Server
 - **Netlify:** arraste a pasta do projeto em `app.netlify.com/drop` ou conecte o repositório. Não há etapa de build.
 - **Vercel:** importe o repositório e escolha o preset **Other**. Diretório de saída: raiz do projeto.
 
+Depois de apontar um domínio próprio, troque `mandadacoluna.vercel.app` por ele em `index.html`, `robots.txt` e `sitemap.xml`; então envie o sitemap ao Google Search Console.
+
 ## Onde personalizar
 
 - `js/config.js`: nome do projeto, contato, avisos, cores, imagens, preços e URLs dos seis produtos. Os links/imagens atuais são provisórios.
