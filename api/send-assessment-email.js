@@ -31,9 +31,9 @@ async function upsertBrevoContact({ apiKey, email, firstName, marketingConsent }
   const marketingListId = Number.parseInt(process.env.BREVO_MARKETING_LIST_ID, 10);
   const payload = {
     email: String(email).trim(),
-    updateEnabled: true,
-    attributes: firstName ? { FIRSTNAME: String(firstName).trim().slice(0, 100) } : {}
+    updateEnabled: true
   };
+  if (firstName) payload.attributes = { FIRSTNAME: String(firstName).trim().slice(0, 100) };
   if (marketingConsent && Number.isInteger(marketingListId) && marketingListId > 0) {
     payload.listIds = [marketingListId];
   }
