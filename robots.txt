@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mandadacoluna.vercel.app/sitemap.xml
+Sitemap: https://mandaladacoluna.vercel.app/sitemap.xml
