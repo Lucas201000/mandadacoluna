@@ -1,0 +1,10 @@
+{
+  "name": "Mandala da Dor na Coluna",
+  "short_name": "Mandala da Dor",
+  "description": "Avaliação educativa sobre padrões de dor na coluna.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F6F8FA",
+  "theme_color": "#237A6B",
+  "icons": [{ "src": "assets/icons/mandala.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
