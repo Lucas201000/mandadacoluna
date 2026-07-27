@@ -36,3 +36,5 @@ Adicione primeiro o módulo em `MODULES` e o produto correspondente em `MODULE_P
 ## Privacidade e saúde
 
 As páginas `privacidade.html`, `termos.html` e `aviso-saude.html` já estão ligadas no `config.js`. Revise seus textos, preencha responsável e canal de contato e valide juridicamente antes da publicação comercial. O aceite de marketing é separado do aceite necessário para gerar o relatório.
+
+O arquivo `vercel.json` adiciona cabeçalhos básicos de segurança para a publicação na Vercel.
