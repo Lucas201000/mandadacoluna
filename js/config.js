@@ -3,7 +3,7 @@ export const STORAGE_KEY = 'mandalaDorAssessmentV1';
 export const PROJECT = {
   name: 'Mandala da Dor na Coluna', logo: 'M', professional: 'Profissional responsável', registration: '',
   email: 'contato@seudominio.com', whatsapp: '5511999999999', storefrontUrl: 'vitrine.html',
-  privacyUrl: '#politica-de-privacidade', termsUrl: '#termos-de-uso', healthNoticeUrl: '#aviso-de-saude',
+  privacyUrl: 'privacidade.html', termsUrl: 'termos.html', healthNoticeUrl: 'aviso-saude.html',
   healthNotice: 'Esta ferramenta possui finalidade educativa e não substitui avaliação, diagnóstico ou tratamento profissional.'
 };
 // SUPABASE — a chave publishable pode ficar no frontend quando as políticas RLS estiverem ativas.
