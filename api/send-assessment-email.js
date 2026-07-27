@@ -1,5 +1,18 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SITE_URL = (process.env.PUBLIC_SITE_URL || 'https://mandaladacoluna.vercel.app').replace(/\/$/, '');
+const RATE_WINDOW_MS = 15 * 60 * 1000;
+const MAX_REQUESTS_PER_WINDOW = 5;
+const requestWindows = new Map();
+
+function allowRequest(request) {
+  const now = Date.now();
+  const client = String(request.headers['x-forwarded-for'] || request.socket?.remoteAddress || 'unknown').split(',')[0].trim();
+  const attempts = (requestWindows.get(client) || []).filter(timestamp => now - timestamp < RATE_WINDOW_MS);
+  if (attempts.length >= MAX_REQUESTS_PER_WINDOW) return false;
+  attempts.push(now);
+  requestWindows.set(client, attempts);
+  return true;
+}
 
 function escapeHtml(value = '') {
   return String(value)
@@ -50,7 +63,8 @@ module.exports = async (request, response) => {
 
   const origin = request.headers.origin;
   const requestOrigin = request.headers.host ? `https://${request.headers.host}` : SITE_URL;
-  if (origin && origin !== requestOrigin) return json(response, 403, { error: 'Origem não autorizada.' });
+  if (!origin || origin !== requestOrigin) return json(response, 403, { error: 'Origem não autorizada.' });
+  if (!allowRequest(request)) return json(response, 429, { error: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' });
 
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.BREVO_SENDER_EMAIL;

@@ -13,7 +13,9 @@ async function sendAssessmentEmail(result) {
       marketingConsent: Boolean(result.user.marketingConsent)
     })
   });
+  const delivery = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error('E-mail transacional não enviado.');
+  return delivery;
 }
 
 export function mountLeadForm(result, onSuccess) {
@@ -34,7 +36,7 @@ export function mountLeadForm(result, onSuccess) {
     submit.textContent = 'Salvando com segurança...';
 
     try {
-      const leadSave = await saveLead(data, result);
+      await saveLead(data, result);
       trackEvent('lead_submitted');
       document.querySelector('#lead-gate').classList.add('hidden');
       onSuccess();
@@ -48,10 +50,10 @@ export function mountLeadForm(result, onSuccess) {
 
       // O relatório continua disponível mesmo se a Brevo estiver temporariamente indisponível.
       sendAssessmentEmail(result)
-        .then(() => {
-          emailStatus.textContent = leadSave.remoteSaved === false
+        .then(delivery => {
+          emailStatus.textContent = delivery.contactSaved
             ? 'Enviamos uma confirmação para o seu e-mail e cadastramos seu contato na Brevo.'
-            : 'Enviamos uma confirmação para o seu e-mail.';
+            : 'Enviamos uma confirmação para o seu e-mail. O relatório segue liberado.';
           trackEvent('assessment_email_sent');
         })
         .catch(error => {
