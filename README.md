@@ -33,8 +33,9 @@ A função protegida `api/send-assessment-email.js` envia uma confirmação de a
 - `BREVO_SENDER_EMAIL`: remetente já verificado na Brevo.
 - `BREVO_SENDER_NAME`: nome que aparecerá no remetente, por exemplo `Mandala da Dor na Coluna`.
 - `PUBLIC_SITE_URL` (opcional): URL pública do site; atualmente `https://mandaladacoluna.vercel.app`.
+- `BREVO_MARKETING_LIST_ID` (opcional): ID da lista da Brevo para quem marcou a autorização de marketing.
 
-Nunca coloque `BREVO_API_KEY` no `js/config.js`, no GitHub ou em outro arquivo público. Depois de salvar as variáveis, faça um novo deploy pela Vercel ou envie um novo commit. O e-mail não contém as respostas completas do questionário; em caso de sinal de alerta, ele não inclui chamada comercial.
+Nunca coloque `BREVO_API_KEY` no `js/config.js`, no GitHub ou em outro arquivo público. Depois de salvar as variáveis, faça um novo deploy pela Vercel ou envie um novo commit. Cada lead passa a ser cadastrado ou atualizado na Brevo. O e-mail não contém as respostas completas do questionário; em caso de sinal de alerta, ele não inclui chamada comercial.
 
 ## PDF e testes
 

@@ -14,6 +14,34 @@ function json(response, status, body) {
   response.status(status).setHeader('Content-Type', 'application/json; charset=utf-8').send(JSON.stringify(body));
 }
 
+async function upsertBrevoContact({ apiKey, email, firstName, marketingConsent }) {
+  const marketingListId = Number.parseInt(process.env.BREVO_MARKETING_LIST_ID, 10);
+  const payload = {
+    email: String(email).trim(),
+    updateEnabled: true,
+    attributes: firstName ? { FIRSTNAME: String(firstName).trim().slice(0, 100) } : {}
+  };
+  if (marketingConsent && Number.isInteger(marketingListId) && marketingListId > 0) {
+    payload.listIds = [marketingListId];
+  }
+
+  try {
+    const contactResponse = await fetch('https://api.brevo.com/v3/contacts', {
+      method: 'POST',
+      headers: { 'api-key': apiKey, 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!contactResponse.ok) {
+      console.error('Brevo contact upsert failed:', contactResponse.status, await contactResponse.text());
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Brevo contact upsert error:', error);
+    return false;
+  }
+}
+
 module.exports = async (request, response) => {
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'POST');
@@ -22,16 +50,14 @@ module.exports = async (request, response) => {
 
   const origin = request.headers.origin;
   const requestOrigin = request.headers.host ? `https://${request.headers.host}` : SITE_URL;
-  if (origin && origin !== requestOrigin) {
-    return json(response, 403, { error: 'Origem não autorizada.' });
-  }
+  if (origin && origin !== requestOrigin) return json(response, 403, { error: 'Origem não autorizada.' });
 
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.BREVO_SENDER_EMAIL;
   const senderName = process.env.BREVO_SENDER_NAME || 'Mandala da Dor na Coluna';
   if (!apiKey || !senderEmail) return json(response, 503, { error: 'O envio de e-mail ainda não está configurado.' });
 
-  const { firstName, email, assessmentId, primaryModule, redFlagDetected } = request.body || {};
+  const { firstName, email, assessmentId, primaryModule, redFlagDetected, marketingConsent } = request.body || {};
   if (!EMAIL_PATTERN.test(String(email || '')) || !EMAIL_PATTERN.test(senderEmail)) return json(response, 400, { error: 'E-mail inválido.' });
 
   const safeName = escapeHtml(String(firstName || ''));
@@ -46,6 +72,7 @@ module.exports = async (request, response) => {
   const htmlContent = `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#F6F8FA;color:#18322F;font-family:Arial,sans-serif"><main style="max-width:620px;margin:0 auto;padding:28px"><section style="background:#ffffff;border:1px solid #DCE7E4;border-radius:16px;padding:30px"><p style="color:#237A6B;font-weight:700;letter-spacing:.08em;font-size:12px">MANDALA DA DOR NA COLUNA</p><h1 style="font-size:26px;line-height:1.2">${title}</h1><p>Olá${safeName ? `, ${safeName}` : ''}.</p><p>${message}</p>${productBlock}<p style="font-size:13px;color:#60716F">Este e-mail e a avaliação possuem finalidade educativa e não substituem avaliação, diagnóstico ou tratamento profissional.</p><p style="font-size:12px;color:#60716F">Referência da avaliação: ${safeAssessmentId || 'não informada'}.</p></section></main></body></html>`;
 
   try {
+    const contactSaved = await upsertBrevoContact({ apiKey, email, firstName, marketingConsent: Boolean(marketingConsent) });
     const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: { 'api-key': apiKey, 'content-type': 'application/json', accept: 'application/json' },
@@ -55,7 +82,7 @@ module.exports = async (request, response) => {
       console.error('Brevo rejected transactional email:', brevoResponse.status, await brevoResponse.text());
       return json(response, 502, { error: 'Não foi possível enviar o e-mail agora.' });
     }
-    return json(response, 200, { sent: true });
+    return json(response, 200, { sent: true, contactSaved });
   } catch (error) {
     console.error('Brevo transactional email error:', error);
     return json(response, 502, { error: 'Não foi possível enviar o e-mail agora.' });

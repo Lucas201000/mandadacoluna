@@ -9,7 +9,8 @@ async function sendAssessmentEmail(result) {
       firstName: result.user.firstName,
       email: result.user.email,
       primaryModule: MODULES[result.primaryModule]?.name || '',
-      redFlagDetected: result.safety.redFlagDetected
+      redFlagDetected: result.safety.redFlagDetected,
+      marketingConsent: Boolean(result.user.marketingConsent)
     })
   });
   if (!response.ok) throw new Error('E-mail transacional não enviado.');
@@ -28,7 +29,7 @@ export function mountLeadForm(result, onSuccess) {
       name: form.name.value.trim(), email: form.email.value.trim(), whatsapp: form.whatsapp.value.trim(),
       marketing: form.marketing.checked, privacy: form.privacy.checked
     };
-    result.user = { ...result.user, firstName: data.name, email: data.email, whatsapp: data.whatsapp };
+    result.user = { ...result.user, firstName: data.name, email: data.email, whatsapp: data.whatsapp, marketingConsent: data.marketing };
     submit.disabled = true;
     submit.textContent = 'Salvando com segurança...';
 
