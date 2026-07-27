@@ -1,8 +1,8 @@
 // CENTRAL DE CONFIGURAÇÃO — edite aqui textos, links, produtos e dados de contato.
 export const STORAGE_KEY = 'mandalaDorAssessmentV1';
 export const PROJECT = {
-  name: 'Mandala da Dor na Coluna', logo: 'M', professional: 'Profissional responsável', registration: '',
-  email: 'contato@seudominio.com', whatsapp: '5511999999999', storefrontUrl: 'vitrine.html',
+  name: 'Mandala da Dor na Coluna', logo: 'M', professional: 'Lucas Gadoti Servelin', registration: 'CREFITO-15 275401-F',
+  email: 'clinicasetterlin@gmail.com', whatsapp: '5515996592799', storefrontUrl: 'vitrine.html',
   privacyUrl: 'privacidade.html', termsUrl: 'termos.html', healthNoticeUrl: 'aviso-saude.html',
   healthNotice: 'Esta ferramenta possui finalidade educativa e não substitui avaliação, diagnóstico ou tratamento profissional.'
 };
@@ -28,7 +28,7 @@ export const MODULE_PRODUCTS = Object.fromEntries(Object.values(MODULES).map(m=>
   image:`assets/images/produto-modulo-${m.id}.webp`,
   // Cole aqui o link do checkout de cada módulo antes de ativar vendas.
   // Enquanto estiver vazio, a vitrine exibirá que o produto está em configuração.
-  checkoutUrl:'', price:'Preço a configurar', shortDescription:m.recommendation, color:m.color
+  checkoutUrl:'', price:'R$ 27,17/mês', shortDescription:m.recommendation, color:m.color
 }]));
 // Depoimentos provisórios — substitua somente por relatos reais autorizados.
 export const STOREFRONT_CONTENT = {
