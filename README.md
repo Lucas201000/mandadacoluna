@@ -25,6 +25,17 @@ Depois de apontar um domínio próprio, troque `mandaladacoluna.vercel.app` por 
 
 O progresso é armazenado em `localStorage`. Para salvar leads no Supabase, abra **SQL Editor** no projeto e execute [`supabase.sql`](supabase.sql). A integração usa somente a chave pública e uma política RLS de inserção; nunca inclua uma chave `service_role` no frontend. `trackEvent()` indica o ponto de integração com GA4 e pixels.
 
+### E-mail transacional pela Brevo
+
+A função protegida `api/send-assessment-email.js` envia uma confirmação de avaliação após o lead ser salvo. Na Vercel, em **Settings → Environment Variables**, configure as variáveis somente no ambiente **Production**:
+
+- `BREVO_API_KEY`: chave de API da Brevo.
+- `BREVO_SENDER_EMAIL`: remetente já verificado na Brevo.
+- `BREVO_SENDER_NAME`: nome que aparecerá no remetente, por exemplo `Mandala da Dor na Coluna`.
+- `PUBLIC_SITE_URL` (opcional): URL pública do site; atualmente `https://mandaladacoluna.vercel.app`.
+
+Nunca coloque `BREVO_API_KEY` no `js/config.js`, no GitHub ou em outro arquivo público. Depois de salvar as variáveis, faça um novo deploy pela Vercel ou envie um novo commit. O e-mail não contém as respostas completas do questionário; em caso de sinal de alerta, ele não inclui chamada comercial.
+
 ## PDF e testes
 
 O PDF usa jsPDF e os gráficos Chart.js por CDN. Conclua uma avaliação, preencha o formulário de liberação e acione **Baixar relatório em PDF**. Verifique: gráficos visíveis, texto sem corte, nome com acentos, link clicável do produto e o comportamento no Safari do iPhone (onde o PDF pode abrir em prévia). A triagem com qualquer sinal de alerta deve exibir prioridade profissional e ocultar a recomendação comercial principal.
