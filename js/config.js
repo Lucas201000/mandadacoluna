@@ -1,7 +1,7 @@
 // CENTRAL DE CONFIGURAÇÃO — edite aqui textos, links, produtos e dados de contato.
 export const STORAGE_KEY = 'mandalaDorAssessmentV1';
 export const PROJECT = {
-  name: 'Mandala da Dor na Coluna', logo: 'M', professional: 'Lucas Gadoti Servelin', registration: 'CREFITO-15 275401-F',
+  name: 'Mandala da Dor na Coluna', logo: 'M', professional: 'Lucas Gadoti Servelin', registration: 'CREFITO 275401-F',
   email: 'clinicasetterlin@gmail.com', whatsapp: '5515996592799', storefrontUrl: 'vitrine.html',
   privacyUrl: 'privacidade.html', termsUrl: 'termos.html', healthNoticeUrl: 'aviso-saude.html',
   healthNotice: 'Esta ferramenta possui finalidade educativa e não substitui avaliação, diagnóstico ou tratamento profissional.'
