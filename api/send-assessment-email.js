@@ -21,7 +21,8 @@ module.exports = async (request, response) => {
   }
 
   const origin = request.headers.origin;
-  if (origin && origin !== SITE_URL) {
+  const requestOrigin = request.headers.host ? `https://${request.headers.host}` : SITE_URL;
+  if (origin && origin !== requestOrigin) {
     return json(response, 403, { error: 'Origem não autorizada.' });
   }
 
