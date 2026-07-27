@@ -1,4 +1,4 @@
-import { saveLead, trackEvent } from './config.js';
+import { MODULES, saveLead, trackEvent } from './config.js';
 
 async function sendAssessmentEmail(result) {
   const response = await fetch('/api/send-assessment-email', {
@@ -8,7 +8,7 @@ async function sendAssessmentEmail(result) {
       assessmentId: result.assessmentId,
       firstName: result.user.firstName,
       email: result.user.email,
-      primaryModule: result.primaryModule,
+      primaryModule: MODULES[result.primaryModule]?.name || '',
       redFlagDetected: result.safety.redFlagDetected
     })
   });
@@ -38,10 +38,21 @@ export function mountLeadForm(result, onSuccess) {
       document.querySelector('#lead-gate').classList.add('hidden');
       onSuccess();
 
+      const reportActions = document.querySelector('#report-actions');
+      const emailStatus = document.createElement('p');
+      emailStatus.className = 'small';
+      emailStatus.setAttribute('role', 'status');
+      emailStatus.textContent = 'Enviando a confirmação para o seu e-mail...';
+      reportActions.querySelector('p')?.insertAdjacentElement('afterend', emailStatus);
+
       // O relatório continua disponível mesmo se a Brevo estiver temporariamente indisponível.
       sendAssessmentEmail(result)
-        .then(() => trackEvent('assessment_email_sent'))
+        .then(() => {
+          emailStatus.textContent = 'Enviamos uma confirmação para o seu e-mail.';
+          trackEvent('assessment_email_sent');
+        })
         .catch(error => {
+          emailStatus.textContent = 'Seu relatório está liberado. Não foi possível enviar o e-mail agora.';
           console.warn('O resultado foi liberado, mas o e-mail não pôde ser enviado.', error);
           trackEvent('assessment_email_failed');
         });
