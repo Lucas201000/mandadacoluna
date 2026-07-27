@@ -27,6 +27,13 @@ export const MODULE_PRODUCTS = Object.fromEntries(Object.values(MODULES).map(m=>
   slug:['dor-inflamatoria','dor-muscular','compressao','rigidez','encurtamento','instabilidade'][m.id-1], productUrl:`vitrine.html?produto=${['dor-inflamatoria','dor-muscular','compressao','rigidez','encurtamento','instabilidade'][m.id-1]}`,
   image:`assets/images/produto-modulo-${m.id}.webp`, price:'Preço a configurar', shortDescription:m.recommendation, color:m.color
 }]));
+// Depoimentos provisórios — substitua somente por relatos reais autorizados.
+export const STOREFRONT_CONTENT = {
+  testimonials: [
+    { quote: 'Exemplo de depoimento: a avaliação ajudou a organizar os próximos passos.', author: 'Relato ilustrativo' },
+    { quote: 'Exemplo de depoimento: consegui compreender melhor meus relatos e conversar com mais clareza com um profissional.', author: 'Relato ilustrativo' }
+  ]
+};
 export function trackEvent(eventName,eventData={}) { console.info('[Mandala analytics]',eventName,eventData); /* GA4 / Meta / TikTok / API futura aqui */ }
 export async function saveLead(leadData,assessmentData) {
   const payload={leadData,assessmentId:assessmentData.assessmentId,savedAt:new Date().toISOString()};
