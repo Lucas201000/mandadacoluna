@@ -1,0 +1,20 @@
+.product-art {
+  overflow: hidden;
+  background-color: #08263a;
+  background-position: center;
+  background-size: cover;
+  color: transparent;
+}
+
+.store-card:nth-child(1) .product-art { background-image: url('../assets/images/produto-modulo-1.png'); }
+.store-card:nth-child(2) .product-art { background-image: url('../assets/images/produto-modulo-2.png'); }
+.store-card:nth-child(3) .product-art { background-image: url('../assets/images/produto-modulo-3.png'); }
+.store-card:nth-child(4) .product-art { background-image: url('../assets/images/produto-modulo-4.png'); }
+.store-card:nth-child(5) .product-art { background-image: url('../assets/images/produto-modulo-5.png'); }
+.store-card:nth-child(6) .product-art { background-image: url('../assets/images/produto-modulo-6.png'); }
+
+.result-cover {
+  background-position: center;
+  background-size: cover;
+  color: transparent;
+}
