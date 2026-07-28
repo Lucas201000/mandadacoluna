@@ -22,10 +22,24 @@ export const MODULES = {
   instabilidade:{id:6,key:'instabilidade',name:'Dor associada a instabilidade, falta de força ou controle',short:'Instabilidade',color:'#3569B7',description:'Seus relatos apresentam características semelhantes a pouca firmeza, resistência ou controle.',recommendation:'Fortalecimento e controle de movimento são temas educativos que podem ser individualizados por um profissional.'}
 };
 // Substitua URLs, imagens e preços provisórios antes de publicar.
+// IDs dos produtos criados na Hotmart. Não são links de checkout: mantenha-os aqui
+// para conferir a correspondência entre vendas, Flowlink e vitrine.
+export const HOTMART_PRODUCT_IDS = {
+  inflamatoria: '8200610',
+  muscular: '8200634',
+  compressao: '8200662',
+  rigidez: '8200755',
+  encurtamento: '8201776',
+  instabilidade: '8201801',
+  // Preencha quando o combo de 6 meses for criado e aprovado na Hotmart.
+  combo: ''
+};
+
 export const MODULE_PRODUCTS = Object.fromEntries(Object.values(MODULES).map(m=>[m.key,{
   moduleId:m.id,name:`Módulo ${m.id} — ${['Acalmando a dor irritada','Alívio da tensão muscular','Dor irradiada e nervo sensível','Recuperando a mobilidade','Flexibilidade e músculos encurtados','Força, estabilidade e controle'][m.id-1]}`,
   slug:['dor-inflamatoria','dor-muscular','compressao','rigidez','encurtamento','instabilidade'][m.id-1], productUrl:`vitrine.html?produto=${['dor-inflamatoria','dor-muscular','compressao','rigidez','encurtamento','instabilidade'][m.id-1]}`,
   image:`assets/images/produto-modulo-${m.id}.webp`,
+  hotmartProductId: HOTMART_PRODUCT_IDS[m.key],
   // Cole aqui o link do checkout de cada módulo antes de ativar vendas.
   // Enquanto estiver vazio, a vitrine exibirá que o produto está em configuração.
   checkoutUrl:'', price:'R$ 27,17/mês', shortDescription:m.recommendation, color:m.color
