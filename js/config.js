@@ -38,7 +38,7 @@ export const HOTMART_PRODUCT_IDS = {
 export const MODULE_PRODUCTS = Object.fromEntries(Object.values(MODULES).map(m=>[m.key,{
   moduleId:m.id,name:`Módulo ${m.id} — ${['Acalmando a dor irritada','Alívio da tensão muscular','Dor irradiada e nervo sensível','Recuperando a mobilidade','Flexibilidade e músculos encurtados','Força, estabilidade e controle'][m.id-1]}`,
   slug:['dor-inflamatoria','dor-muscular','compressao','rigidez','encurtamento','instabilidade'][m.id-1], productUrl:`vitrine.html?produto=${['dor-inflamatoria','dor-muscular','compressao','rigidez','encurtamento','instabilidade'][m.id-1]}`,
-  image:`assets/images/produto-modulo-${m.id}.png`,
+  image:`assets/images/produto-modulo-${m.id}.jpg`,
   hotmartProductId: HOTMART_PRODUCT_IDS[m.key],
   // Cole aqui o link do checkout de cada módulo antes de ativar vendas.
   // Enquanto estiver vazio, a vitrine exibirá que o produto está em configuração.
