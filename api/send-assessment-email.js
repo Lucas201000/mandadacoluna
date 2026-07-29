@@ -28,7 +28,9 @@ function json(response, status, body) {
 }
 
 async function upsertBrevoContact({ apiKey, email, firstName, marketingConsent }) {
-  const marketingListId = Number.parseInt(process.env.BREVO_MARKETING_LIST_ID, 10);
+  // Lista "Mandala — conteúdos autorizados" criada na Brevo.
+  // A variável da Vercel continua tendo prioridade, permitindo trocar a lista sem editar código.
+  const marketingListId = Number.parseInt(process.env.BREVO_MARKETING_LIST_ID || '3', 10);
   const payload = {
     email: String(email).trim(),
     updateEnabled: true
