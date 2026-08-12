@@ -4,11 +4,12 @@ const s = (inflamatoria = 0, muscular = 0, compressao = 0, rigidez = 0, encurtam
 const q = (id, theme, question, options) => ({ id, theme, question, options: options.map(([optionId, text, scores]) => ({ id: `${optionId}`, text, scores })) });
 
 export const QUESTIONS = [
-  q('q01', 'Como a dor se apresenta', 'Qual frase descreve melhor sua dor na maior parte do tempo?', [
+  q('q01', 'Como a dor se apresenta', 'Qual frase mais combina com o que você sente na maior parte do tempo?', [
     ['a', 'É forte, não passa e parece irritada', s(4, 0, 1, 1)],
     ['b', 'Parece peso, cansaço ou músculos doloridos', s(0, 4, 0, 1)],
     ['c', 'Parece choque, queimação ou pontadas que se espalham', s(1, 0, 5, 0)],
-    ['d', 'Parece travamento ou dificuldade para me mexer', s(1, 1, 0, 5)]
+    ['d', 'Parece travamento ou dificuldade para me mexer', s(1, 1, 0, 5)],
+    ['e', 'Não sei dizer', s()]
   ]),
   q('q02', 'Quando aparece', 'Em qual situação a dor costuma ficar mais presente?', [
     ['a', 'Mesmo parado(a), é difícil achar uma posição confortável', s(4, 0, 1)],
@@ -34,7 +35,7 @@ export const QUESTIONS = [
     ['c', 'Com sensação de puxar nas pernas ou no quadril', s(0, 1, 0, 1, 5)],
     ['d', 'Não percebo isso', s()]
   ]),
-  q('q06', 'Movimentos', 'Qual movimento parece mais difícil para você?', [
+  q('q06', 'Movimentos', 'Qual movimento do dia a dia parece mais difícil para você?', [
     ['a', 'Girar o corpo ou olhar para os lados', s(0, 1, 0, 5)],
     ['b', 'Abaixar ou levantar', s(1, 1, 1, 4, 2)],
     ['c', 'Chegar perto dos pés com as mãos', s(0, 0, 0, 1, 5)],
@@ -68,7 +69,7 @@ export const QUESTIONS = [
     ['b', 'Às vezes', s(0, 0, 3)],
     ['c', 'Não percebo', s()]
   ]),
-  q('q12', 'Posições', 'Qual situação mais parece com o que você sente?', [
+  q('q12', 'Posições', 'Qual situação mais combina com o que você sente?', [
     ['a', 'É difícil achar uma posição confortável', s(4, 0, 1)],
     ['b', 'Piora quando fico sentado(a) ou em pé por muito tempo', s(0, 2, 0, 1, 0, 4)],
     ['c', 'Piora em uma posição bem específica', s(1, 0, 4)],
@@ -98,7 +99,7 @@ export const QUESTIONS = [
     ['c', 'Queimação, choque ou formigamento', s(1, 0, 5)],
     ['d', 'Rigidez que limita meus movimentos', s(1, 0, 0, 5)]
   ]),
-  q('q17', 'Depois do esforço', 'Depois de atividade física ou tarefas do dia a dia, o que você percebe?', [
+  q('q17', 'Depois do esforço', 'Depois de se exercitar ou fazer tarefas do dia a dia, o que você percebe?', [
     ['a', 'A dor fica irritada e demora para acalmar', s(4)],
     ['b', 'Os músculos ficam cansados e tensos', s(0, 5)],
     ['c', 'A dor se espalha ou fica mais sensível', s(0, 0, 4)],
