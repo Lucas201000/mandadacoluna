@@ -6,9 +6,7 @@ const products = Object.values(MODULE_PRODUCTS);
 const selected = products.find(product => product.slug === selectedSlug);
 
 function trialAction(product) {
-  const label = product.trialUrlConfigured
-    ? `Acessar aula experimental do Módulo ${product.moduleId}`
-    : 'Acessar a plataforma Flowlink';
+  const label = `Acessar o Módulo ${product.moduleId}`;
 
   return `<a class="btn" href="${product.trialUrl}" target="_blank" rel="noopener" data-trial="${product.slug}">${label}</a>`;
 }
