@@ -111,7 +111,8 @@ export const QUESTIONS = [
     ['c', 'Minha dor se espalha, aperta ou vai para outra região', s(0, 0, 5)],
     ['d', 'Tenho dificuldade para me mexer ou meu corpo fica rígido', s(0, 0, 0, 5)],
     ['e', 'Sinto meus músculos curtos ou puxando', s(0, 0, 0, 0, 5)],
-    ['f', 'Sinto minha coluna fraca ou sem firmeza', s(0, 0, 0, 0, 0, 5)]
+    ['f', 'Sinto minha coluna fraca ou sem firmeza', s(0, 0, 0, 0, 0, 5)],
+    ['g', 'Nenhuma dessas frases descreve bem o que sinto', s()]
   ])
 ];
 
