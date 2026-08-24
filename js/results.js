@@ -28,6 +28,26 @@ if (!result || !result.answers) {
   show();
 }
 
+function recommendedModuleCard(module, product, placement, compact = false) {
+  const description = compact
+    ? 'Aula experimental disponível para você conhecer o conteúdo deste módulo.'
+    : product.shortDescription;
+
+  return `
+    <section class="card module-access module-access--${placement}" style="--module-color:${product.color};--product-color:${product.color}">
+      <p class="question-meta">${placement === 'top' ? 'SEU PRÓXIMO PASSO EDUCATIVO' : 'MÓDULO RECOMENDADO'}</p>
+      <div class="product">
+        <div class="product-art" aria-hidden="true">${module.id}</div>
+        <div>
+          <h3>${esc(product.name)}</h3>
+          <p>${esc(description)}</p>
+          ${compact ? '' : '<p class="small"><strong>Aula experimental disponível.</strong></p>'}
+          <a class="btn" href="${product.trialUrl}" target="_blank" rel="noopener" data-module-access="${placement}">Acessar o Módulo ${module.id}</a>
+        </div>
+      </div>
+    </section>`;
+}
+
 function show() {
   const module = MODULES[result.primaryModule];
   const product = result.recommendedProduct;
@@ -47,8 +67,8 @@ function show() {
         <strong>Suas respostas incluem sinais que merecem avaliação profissional.</strong><br>
         Isso não significa necessariamente que exista algo grave, mas esse tipo de sintoma não deve ser analisado somente por um questionário online. Procure atendimento profissional.
       </section>` : ''}
-    <div class="results-grid" style="margin-top:20px">
-      <section class="card primary" style="--module-color:${module.color}">
+    <div class="results-grid ${!flagDetected ? 'has-recommendation' : ''}" style="margin-top:20px">
+      <section class="card primary result-primary" style="--module-color:${module.color}">
         <p class="question-meta">PERFIL PREDOMINANTE</p>
         <h2>Módulo ${module.id} — ${module.name}</h2>
         <div class="metric">${result.percentages[module.key]}%</div>
@@ -56,7 +76,7 @@ function show() {
         <p>${module.description}</p>
         <p class="notice">${PROJECT.healthNotice}</p>
       </section>
-      <section class="card">
+      <section class="card result-summary">
         <h3>Resumo dos relatos</h3>
         <ul class="detail-list">
           <li>Intensidade informada: ${result.pain.intensity}/10</li>
@@ -65,6 +85,7 @@ function show() {
           <li>Secundários: ${result.secondaryModules.map(key => MODULES[key].short).join(' e ')}</li>
         </ul>
       </section>
+      ${!flagDetected ? recommendedModuleCard(module, product, 'top', true) : ''}
     </div>
     <section class="card" style="margin-top:20px">
       <h2>Compatibilidade com os módulos</h2>
@@ -75,19 +96,7 @@ function show() {
       <h2>Principais perfis</h2>
       <div class="chart-wrap"><canvas id="profile-chart" aria-label="Gráfico de distribuição dos principais perfis"></canvas></div>
     </section>
-    ${!flagDetected ? `
-      <section class="card" style="margin-top:20px">
-        <p class="question-meta">MÓDULO RECOMENDADO</p>
-        <div class="product">
-          <div class="product-art" style="--product-color:${product.color}">${module.id}</div>
-          <div>
-            <h3>${product.name}</h3>
-            <p>${product.shortDescription}</p>
-            <p class="small"><strong>Aula experimental disponível.</strong></p>
-            <a class="btn" href="${product.trialUrl}" target="_blank" rel="noopener" id="product-link">Acessar o Módulo ${module.id}</a>
-          </div>
-        </div>
-      </section>` : ''}
+    ${!flagDetected ? `<div style="margin-top:20px">${recommendedModuleCard(module, product, 'middle')}</div>` : ''}
     <section class="card lead-box" id="lead-gate">
       <h2>Para liberar seu relatório completo para download, faça um breve cadastro.</h2>
       <p class="small">Em seguida, você poderá baixar o PDF. Autorizar conteúdos e recomendações é opcional.</p>
@@ -108,11 +117,12 @@ function show() {
         <div class="actions"><button class="btn" type="submit">Liberar relatório completo</button></div>
       </form>
     </section>
-    <section class="card hidden" id="report-actions" style="margin-top:20px">
+    <section class="card hidden" id="report-actions" style="margin-top:20px" tabindex="-1">
       <h2>Seu relatório está liberado</h2>
       <p class="small">A geração pode abrir uma prévia em alguns navegadores de celular.</p>
       <div class="actions">
         <button class="btn" id="pdf">Baixar relatório em PDF</button>
+        ${!flagDetected ? `<a class="btn secondary" href="${product.trialUrl}" target="_blank" rel="noopener" data-module-access="unlocked">Acessar o Módulo ${module.id}</a>` : ''}
         <button class="btn secondary" id="print">Imprimir</button>
         <a class="btn ghost" href="index.html" id="restart">Refazer avaliação</a>
       </div>
@@ -122,13 +132,21 @@ function show() {
   const charts = renderCharts(result);
   trackEvent('result_viewed');
 
-  if (!flagDetected) {
-    document.querySelector('#product-link').onclick = () => {
-      trackEvent('trial_lesson_clicked', { module: result.primaryModule });
+  document.querySelectorAll('[data-module-access]').forEach(link => {
+    link.onclick = () => {
+      trackEvent('trial_lesson_clicked', { module: result.primaryModule, placement: link.dataset.moduleAccess });
     };
-  }
+  });
 
-  mountLeadForm(result, () => document.querySelector('#report-actions').classList.remove('hidden'));
+  mountLeadForm(result, () => {
+    const reportActions = document.querySelector('#report-actions');
+    reportActions.classList.remove('hidden');
+    try {
+      reportActions.focus({ preventScroll: true });
+    } catch {
+      reportActions.focus();
+    }
+  });
 
   document.querySelector('#pdf').onclick = async event => {
     event.currentTarget.disabled = true;

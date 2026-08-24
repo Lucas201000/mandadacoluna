@@ -8,13 +8,25 @@ function safeName(name) {
   return (name || 'usuario').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase();
 }
 
+function resolveProductUrl(product) {
+  const configuredUrl = product?.trialUrl || product?.productUrl || PROJECT.flowlinkUrl || PROJECT.storefrontUrl;
+  if (!configuredUrl) return '';
+  try {
+    return new URL(configuredUrl, window.location.href).href;
+  } catch {
+    return '';
+  }
+}
+
 export async function generatePdf(result, charts) {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
   const margin = 16;
   const primary = MODULES[result.primaryModule];
-  const product = result.recommendedProduct;
-  const productUrl = new URL(product.trialUrl, location.href).href;
+  const product = result.recommendedProduct || {};
+  const productUrl = resolveProductUrl(product);
+  const productName = product.name || `Módulo ${primary.id}`;
+  const productDescription = product.shortDescription || primary.recommendation;
   const foot = () => {
     pdf.setFontSize(8);
     pdf.setTextColor(90);
@@ -96,19 +108,25 @@ export async function generatePdf(result, charts) {
   pdf.setTextColor(255);
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(16);
-  pdf.text(product.name, 24, 73, { maxWidth: 160 });
+  pdf.text(productName, 24, 73, { maxWidth: 160 });
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(10);
-  pdf.text(product.shortDescription, 24, 84, { maxWidth: 160 });
-  if (!result.safety.redFlagDetected) {
-    pdf.setTextColor(24, 50, 47);
+  pdf.text(productDescription, 24, 84, { maxWidth: 160 });
+  if (!result.safety.redFlagDetected && productUrl) {
+    pdf.setFillColor(primary.color);
+    pdf.roundedRect(margin, 118, 178, 16, 4, 4, 'F');
+    pdf.setTextColor(255);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(14);
     pdf.text(`Acessar o Módulo ${primary.id}`, margin, 130);
     pdf.link(margin, 118, 178, 20, { url: productUrl });
+    pdf.setTextColor(24, 50, 47);
+    // Área clicável independente de imagem: funciona mesmo se a capa do produto não carregar.
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10);
     pdf.text(`Caso o botão não abra, acesse: ${productUrl}`, margin, 145, { maxWidth: 175 });
+    // Mantém também o endereço escrito como uma segunda área clicável no PDF.
+    pdf.link(margin, 138, 178, 16, { url: productUrl });
   }
   foot();
 
