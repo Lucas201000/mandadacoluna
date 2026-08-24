@@ -4,7 +4,7 @@ const s = (inflamatoria = 0, muscular = 0, compressao = 0, rigidez = 0, encurtam
 const q = (id, theme, question, options) => ({ id, theme, question, options: options.map(([optionId, text, scores]) => ({ id: `${optionId}`, text, scores })) });
 
 export const QUESTIONS = [
-  q('q01', 'Como a dor se apresenta', 'Qual frase mais combina com o que você sente na maior parte do tempo?', [
+  q('q01', 'Como é sua dor', 'Na maior parte do tempo, como você sente a sua dor?', [
     ['a', 'É forte, não passa e parece irritada', s(4, 0, 1, 1)],
     ['b', 'Parece peso, cansaço ou músculos doloridos', s(0, 4, 0, 1)],
     ['c', 'Parece choque, queimação ou pontadas que se espalham', s(1, 0, 5, 0)],
