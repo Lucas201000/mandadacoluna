@@ -8,9 +8,9 @@ export const QUESTION_BREAKS = [
     afterQuestionId: 'q06',
     eyebrow: 'RELATO PÚBLICO NO GOOGLE',
     title: 'Muita gente passa meses tentando entender a dor.',
-    quote: '“8 meses de dor crônica na região da lombar...”',
+    quote: '“Acho que a melhor palavra para descrever minha trajetória com o Lucas é gratidão! [...] 8 meses de dor crônica na região da lombar [...] Hoje já não sinto mais dor graças a esse profissional...”',
     author: 'Marina R. — avaliação pública no Google',
-    note: 'Este é um relato individual. Cada pessoa tem uma história e precisa ser considerada de forma individual.',
+    note: 'Relato individual publicado no Google. Resultados podem variar e não substituem avaliação profissional.',
     sourceUrl: GOOGLE_REVIEWS_URL
   },
   {
@@ -18,9 +18,9 @@ export const QUESTION_BREAKS = [
     afterQuestionId: 'q12',
     eyebrow: 'RELATO PÚBLICO NO GOOGLE',
     title: 'Você não precisa tentar entender tudo sozinho(a).',
-    quote: '“Cheguei à clínica com muita dor no quadril...”',
+    quote: '“Tive uma ótima experiência, cheguei à clínica com muita dor no quadril e saí quase sem sentir nada [...] obrigado pelo ótimo trabalho.”',
     author: 'José E. — avaliação pública no Google',
-    note: 'Este é um relato individual. Ele não representa diagnóstico nem garantia de resultado.',
+    note: 'Relato individual publicado no Google. Resultados podem variar e não substituem avaliação profissional.',
     sourceUrl: GOOGLE_REVIEWS_URL
   }
 ];
