@@ -67,6 +67,6 @@ document.querySelectorAll('[data-details]').forEach(button => {
 if (selected) {
   setTimeout(() => document.querySelector(`#${selected.slug}`)?.scrollIntoView({
     behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-    block: 'center'
+    block: 'start'
   }), 150);
 }
