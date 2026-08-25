@@ -132,7 +132,7 @@ function waitForChartsToPaint() {
   });
 }
 
-export async function generatePdf(result, charts) {
+async function buildAssessmentPdf(result, charts) {
   if (!window.jspdf?.jsPDF) {
     throw new Error('A biblioteca de PDF não foi carregada.');
   }
@@ -283,7 +283,40 @@ export async function generatePdf(result, charts) {
 
   const date = new Date(result.createdAt);
   const name = `avaliacao-mandala-da-dor-${safeName(result.user.firstName)}-${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}.pdf`;
-  pdf.save(name);
+
+  return { pdf, filename: name };
+}
+
+function arrayBufferToBase64(arrayBuffer) {
+  const bytes = new Uint8Array(arrayBuffer);
+  const chunkSize = 0x8000;
+  let binary = '';
+
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)));
+  }
+
+  return window.btoa(binary);
+}
+
+// Gera o mesmo arquivo usado no download, mas sem iniciar um download automático.
+// O conteúdo fica apenas na memória do navegador até ser enviado pelo HTTPS à função da Vercel.
+export async function createPdfAttachment(result, charts) {
+  const { pdf, filename } = await buildAssessmentPdf(result, charts);
+  const arrayBuffer = pdf.output('arraybuffer');
+
+  return {
+    name: filename,
+    content: arrayBufferToBase64(arrayBuffer),
+    size: arrayBuffer.byteLength
+  };
+}
+
+export async function generatePdf(result, charts) {
+  const { pdf, filename } = await buildAssessmentPdf(result, charts);
+  pdf.save(filename);
   trackEvent('pdf_generated');
   trackEvent('pdf_downloaded');
+
+  return { filename };
 }

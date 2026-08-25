@@ -1,6 +1,9 @@
 import { MODULES, saveLead, trackEvent } from './config.js';
 
-async function sendAssessmentEmail(result) {
+// Mantém o corpo enviado à função da Vercel abaixo do limite seguro, mesmo após o Base64.
+const MAX_EMAIL_PDF_BYTES = Math.floor(2.5 * 1024 * 1024);
+
+async function sendAssessmentEmail(result, attachment = null) {
   const response = await fetch('/api/send-assessment-email', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -10,7 +13,8 @@ async function sendAssessmentEmail(result) {
       email: result.user.email,
       primaryModule: MODULES[result.primaryModule]?.name || '',
       redFlagDetected: result.safety.redFlagDetected,
-      marketingConsent: Boolean(result.user.marketingConsent)
+      marketingConsent: Boolean(result.user.marketingConsent),
+      attachment: attachment ? { name: attachment.name, content: attachment.content } : undefined
     })
   });
   const delivery = await response.json().catch(() => ({}));
@@ -18,7 +22,16 @@ async function sendAssessmentEmail(result) {
   return delivery;
 }
 
-export function mountLeadForm(result, onSuccess) {
+function addEmailStatus(reportActions) {
+  const emailStatus = document.createElement('p');
+  emailStatus.className = 'small';
+  emailStatus.setAttribute('role', 'status');
+  emailStatus.setAttribute('aria-live', 'polite');
+  reportActions.querySelector('p')?.insertAdjacentElement('afterend', emailStatus);
+  return emailStatus;
+}
+
+export function mountLeadForm(result, onSuccess, createAttachment) {
   const form = document.querySelector('#lead-form');
   if (!form) return;
 
@@ -42,25 +55,50 @@ export function mountLeadForm(result, onSuccess) {
       onSuccess();
 
       const reportActions = document.querySelector('#report-actions');
-      const emailStatus = document.createElement('p');
-      emailStatus.className = 'small';
-      emailStatus.setAttribute('role', 'status');
-      emailStatus.textContent = 'Enviando a confirmação para o seu e-mail...';
-      reportActions.querySelector('p')?.insertAdjacentElement('afterend', emailStatus);
+      const emailStatus = addEmailStatus(reportActions);
+      reportActions.setAttribute('aria-busy', 'true');
+      emailStatus.textContent = 'Preparando uma cópia do seu relatório em PDF para enviar ao e-mail...';
+
+      let attachment = null;
+      let attachmentIssue = '';
+
+      try {
+        if (typeof createAttachment !== 'function') throw new Error('Função de PDF não disponível.');
+        trackEvent('assessment_pdf_email_requested');
+        attachment = await createAttachment();
+        if (!attachment?.name || !attachment?.content) throw new Error('O PDF não foi preparado.');
+        if (attachment.size > MAX_EMAIL_PDF_BYTES) {
+          attachment = null;
+          attachmentIssue = 'size';
+        }
+      } catch (error) {
+        attachment = null;
+        attachmentIssue = 'generation';
+        console.warn('Não foi possível preparar a cópia em PDF para o e-mail.', error);
+      }
 
       // O relatório continua disponível mesmo se a Brevo estiver temporariamente indisponível.
-      sendAssessmentEmail(result)
-        .then(delivery => {
+      try {
+        const delivery = await sendAssessmentEmail(result, attachment);
+        if (delivery.pdfAttached) {
+          emailStatus.textContent = `Enviamos o relatório em PDF para ${data.email}.`;
+          trackEvent('assessment_pdf_emailed');
+        } else if (attachmentIssue === 'size') {
+          emailStatus.textContent = 'Enviamos uma confirmação para o seu e-mail. O PDF ficou disponível para baixar abaixo porque ficou grande demais para anexar.';
+          trackEvent('assessment_email_sent', { attachment: 'too_large' });
+        } else {
           emailStatus.textContent = delivery.contactSaved
-            ? 'Enviamos uma confirmação para o seu e-mail e cadastramos seu contato na Brevo.'
-            : 'Enviamos uma confirmação para o seu e-mail. O relatório segue liberado.';
-          trackEvent('assessment_email_sent');
-        })
-        .catch(error => {
-          emailStatus.textContent = 'Seu relatório está liberado. Não foi possível enviar o e-mail agora.';
-          console.warn('O resultado foi liberado, mas o e-mail não pôde ser enviado.', error);
-          trackEvent('assessment_email_failed');
-        });
+            ? 'Enviamos uma confirmação para o seu e-mail e cadastramos seu contato na Brevo. O PDF segue disponível para baixar abaixo.'
+            : 'Enviamos uma confirmação para o seu e-mail. O PDF segue disponível para baixar abaixo.';
+          trackEvent('assessment_email_sent', { attachment: attachmentIssue || 'not_available' });
+        }
+      } catch (error) {
+        emailStatus.textContent = 'Seu relatório está liberado. Não foi possível enviar a cópia por e-mail agora; você pode baixá-la abaixo.';
+        console.warn('O resultado foi liberado, mas o e-mail não pôde ser enviado.', error);
+        trackEvent('assessment_email_failed');
+      } finally {
+        reportActions.removeAttribute('aria-busy');
+      }
     } catch (error) {
       console.error(error);
       const message = document.createElement('p');

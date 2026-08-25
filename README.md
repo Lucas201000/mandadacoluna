@@ -27,7 +27,7 @@ O progresso é armazenado em `localStorage`. Para salvar leads no Supabase, abra
 
 ### E-mail transacional pela Brevo
 
-A função protegida `api/send-assessment-email.js` envia uma confirmação de avaliação após o lead ser salvo. Na Vercel, em **Settings → Environment Variables**, configure as variáveis somente no ambiente **Production**:
+A função protegida `api/send-assessment-email.js` prepara o mesmo relatório gerado no navegador e o envia como anexo PDF após o lead ser salvo. O arquivo não é gravado publicamente nem salvo no Supabase: ele permanece apenas na memória do navegador até ser transmitido por HTTPS à função da Vercel e à Brevo. Na Vercel, em **Settings → Environment Variables**, configure as variáveis somente no ambiente **Production**:
 
 - `BREVO_API_KEY`: chave de API da Brevo.
 - `BREVO_SENDER_EMAIL`: remetente já verificado na Brevo.
@@ -35,11 +35,11 @@ A função protegida `api/send-assessment-email.js` envia uma confirmação de a
 - `PUBLIC_SITE_URL` (opcional): URL pública do site; atualmente `https://mandaladacoluna.vercel.app`.
 - `BREVO_MARKETING_LIST_ID` (opcional): ID da lista da Brevo para quem marcou a autorização de marketing.
 
-Nunca coloque `BREVO_API_KEY` no `js/config.js`, no GitHub ou em outro arquivo público. Depois de salvar as variáveis, faça um novo deploy pela Vercel ou envie um novo commit. Cada lead passa a ser cadastrado ou atualizado na Brevo. O e-mail não contém as respostas completas do questionário; em caso de sinal de alerta, ele não inclui chamada comercial.
+Nunca coloque `BREVO_API_KEY` no `js/config.js`, no GitHub ou em outro arquivo público. Depois de salvar as variáveis, faça um novo deploy pela Vercel ou envie um novo commit. Cada lead passa a ser cadastrado ou atualizado na Brevo. O anexo é limitado a 2,5 MB antes da codificação; se ele não puder ser anexado, a pessoa recebe a confirmação e ainda poderá baixar o PDF diretamente no site. O e-mail não contém as respostas completas do questionário; em caso de sinal de alerta, ele não inclui chamada comercial.
 
 ## PDF e testes
 
-O PDF usa jsPDF e os gráficos Chart.js por CDN. Conclua uma avaliação, preencha o formulário de liberação e acione **Baixar relatório em PDF**. Verifique: gráficos visíveis, texto sem corte, nome com acentos, link clicável do produto e o comportamento no Safari do iPhone (onde o PDF pode abrir em prévia). A triagem com qualquer sinal de alerta deve exibir prioridade profissional e ocultar a recomendação comercial principal.
+O PDF usa jsPDF e os gráficos Chart.js por CDN. Conclua uma avaliação e preencha o formulário de liberação. O site enviará uma cópia em PDF para o e-mail informado e manterá o botão **Baixar relatório em PDF** disponível. Verifique: gráficos visíveis, texto sem corte, nome com acentos, anexo recebido, link clicável do produto e o comportamento no Safari do iPhone (onde o PDF pode abrir em prévia). A triagem com qualquer sinal de alerta deve exibir prioridade profissional e ocultar a recomendação comercial principal.
 
 ## Novos módulos
 

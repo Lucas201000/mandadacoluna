@@ -2,7 +2,7 @@ import { PROJECT, STORAGE_KEY, MODULES, trackEvent } from './config.js';
 import { calculateResult } from './scoring.js';
 import { renderCharts } from './charts.js';
 import { mountLeadForm } from './lead.js';
-import { generatePdf } from './pdf-generator.js';
+import { createPdfAttachment, generatePdf } from './pdf-generator.js';
 
 const root = document.querySelector('#result-app');
 const esc = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
@@ -99,7 +99,7 @@ function show() {
     ${!flagDetected ? `<div style="margin-top:20px">${recommendedModuleCard(module, product, 'middle')}</div>` : ''}
     <section class="card lead-box" id="lead-gate">
       <h2>Para liberar seu relatório completo para download, faça um breve cadastro.</h2>
-      <p class="small">Em seguida, você poderá baixar o PDF. Autorizar conteúdos e recomendações é opcional.</p>
+      <p class="small">Após a liberação, enviaremos uma cópia do relatório em PDF para o e-mail informado. Você também poderá baixar o arquivo aqui. Autorizar conteúdos e recomendações é opcional.</p>
       <form id="lead-form">
         <div class="form-grid">
           <label class="field">Nome
@@ -138,15 +138,19 @@ function show() {
     };
   });
 
-  mountLeadForm(result, () => {
-    const reportActions = document.querySelector('#report-actions');
-    reportActions.classList.remove('hidden');
-    try {
-      reportActions.focus({ preventScroll: true });
-    } catch {
-      reportActions.focus();
-    }
-  });
+  mountLeadForm(
+    result,
+    () => {
+      const reportActions = document.querySelector('#report-actions');
+      reportActions.classList.remove('hidden');
+      try {
+        reportActions.focus({ preventScroll: true });
+      } catch {
+        reportActions.focus();
+      }
+    },
+    () => createPdfAttachment(result, charts)
+  );
 
   document.querySelector('#pdf').onclick = async event => {
     event.currentTarget.disabled = true;
