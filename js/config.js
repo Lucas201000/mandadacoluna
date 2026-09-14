@@ -4,7 +4,9 @@ export const PROJECT = {
   name: 'Mandala da Dor na Coluna', logo: 'M', professional: 'Lucas Gadoti Servelin', registration: 'CREFITO 275401-F',
   email: 'clinicasetterlin@gmail.com', whatsapp: '5515996592799', storefrontUrl: 'vitrine.html',
   // Entrada geral da plataforma. Os links individuais das aulas ficam logo abaixo.
-  flowlinkUrl: 'https://app-do-lucas.flowlink-app.online',
+  // Endereço público atual da área de aulas. Mantenha a barra final para
+  // que o mesmo endereço seja usado nos botões, vitrine e relatório em PDF.
+  flowlinkUrl: 'https://clinica-setterlin.flowlink-app.online/',
   privacyUrl: 'privacidade.html', termsUrl: 'termos.html', healthNoticeUrl: 'aviso-saude.html',
   healthNotice: 'Esta ferramenta possui finalidade educativa e não substitui avaliação, diagnóstico ou tratamento profissional.'
 };
@@ -38,7 +40,7 @@ export const HOTMART_PRODUCT_IDS = {
 };
 
 // FLOWLINK — cole o endereço individual de cada aula experimental aqui.
-// Exemplo: https://app-do-lucas.flowlink-app.online/curso/modulo-3/aula-experimental
+// Exemplo: https://clinica-setterlin.flowlink-app.online/curso/modulo-3/aula-experimental
 // Enquanto um endereço individual não estiver confirmado, o botão abre a entrada
 // da plataforma, sem exibir preço ou checkout no site.
 export const FLOWLINK_TRIAL_URLS = {

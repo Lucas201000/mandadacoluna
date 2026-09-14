@@ -275,9 +275,16 @@ async function buildAssessmentPdf(result, charts) {
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10);
     const urlY = buttonY + 27;
-    writeWrappedText(pdf, `Caso o botão não abra, acesse: ${productUrl}`, PAGE.margin, urlY, { maxWidth: 175, lineHeightFactor: 1.35 });
-    // Mantém uma segunda área clicável sobre o endereço escrito.
-    pdf.link(PAGE.margin, urlY - 5, PAGE.contentWidth, 18, { url: productUrl });
+    const urlBottom = writeWrappedText(
+      pdf,
+      `Caso o botão não abra, acesse: ${productUrl}`,
+      PAGE.margin,
+      urlY,
+      { maxWidth: 175, lineHeightFactor: 1.35 }
+    );
+    // Mantém uma segunda área clicável que acompanha todo o endereço,
+    // inclusive quando ele quebra em mais de uma linha no celular.
+    pdf.link(PAGE.margin, urlY - 5, PAGE.contentWidth, Math.max(18, urlBottom - urlY + 10), { url: productUrl });
   }
   addFooter(pdf);
 

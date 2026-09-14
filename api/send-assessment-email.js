@@ -58,13 +58,6 @@ function normalizePdfAttachment(rawAttachment) {
   return { name, content };
 }
 
-function idempotencyKey(assessmentId, pdfAttached) {
-  const safeId = String(assessmentId || 'mandala')
-    .replace(/[^a-zA-Z0-9-]/g, '')
-    .slice(0, 72) || 'mandala';
-  return `${safeId}-${pdfAttached ? 'pdf' : 'confirmation'}-v1`;
-}
-
 async function upsertBrevoContact({ apiKey, email, firstName, marketingConsent }) {
   // Lista "Mandala — conteúdos autorizados" criada na Brevo.
   // A variável da Vercel continua tendo prioridade, permitindo trocar a lista sem editar código.
@@ -158,16 +151,24 @@ const handler = async (request, response) => {
         subject: title,
         htmlContent,
         textContent,
-        headers: { 'Idempotency-Key': idempotencyKey(assessmentId, hasPdfAttachment) },
         attachment: hasPdfAttachment ? [{ name: pdfAttachment.name, content: pdfAttachment.content }] : undefined,
         tags: ['mandala-da-dor', hasSafetyAlert ? 'triagem-prioritaria' : 'resultado-educativo', ...(hasPdfAttachment ? ['relatorio-pdf'] : [])]
       })
     });
+    const brevoPayload = await brevoResponse.json().catch(() => ({}));
     if (!brevoResponse.ok) {
-      console.error('Brevo rejected transactional email:', brevoResponse.status, await brevoResponse.text());
+      console.error('Brevo rejected transactional email:', brevoResponse.status, brevoPayload);
       return json(response, 502, { error: 'Não foi possível enviar o e-mail agora.' });
     }
-    return json(response, 200, { sent: true, contactSaved, pdfAttached: hasPdfAttachment });
+    // A resposta da Brevo confirma que a mensagem entrou na fila de envio.
+    // O identificador permite localizar a entrega nos Logs transacionais,
+    // sem expor chaves ou dados sensíveis ao navegador.
+    return json(response, 200, {
+      sent: true,
+      contactSaved,
+      pdfAttached: hasPdfAttachment,
+      messageId: typeof brevoPayload.messageId === 'string' ? brevoPayload.messageId : null
+    });
   } catch (error) {
     console.error('Brevo transactional email error:', error);
     return json(response, 502, { error: 'Não foi possível enviar o e-mail agora.' });

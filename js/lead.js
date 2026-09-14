@@ -18,7 +18,7 @@ async function sendAssessmentEmail(result, attachment = null) {
     })
   });
   const delivery = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error('E-mail transacional não enviado.');
+  if (!response.ok) throw new Error(delivery.error || 'E-mail transacional não enviado.');
   return delivery;
 }
 
@@ -29,6 +29,23 @@ function addEmailStatus(reportActions) {
   emailStatus.setAttribute('aria-live', 'polite');
   reportActions.querySelector('p')?.insertAdjacentElement('afterend', emailStatus);
   return emailStatus;
+}
+
+function addEmailRetry(reportActions, retryDelivery) {
+  const actions = reportActions.querySelector('.actions');
+  if (!actions) return;
+
+  let retry = actions.querySelector('#email-retry');
+  if (!retry) {
+    retry = document.createElement('button');
+    retry.id = 'email-retry';
+    retry.type = 'button';
+    retry.className = 'btn ghost';
+    retry.textContent = 'Não recebeu? Reenviar por e-mail';
+    actions.append(retry);
+  }
+
+  retry.onclick = retryDelivery;
 }
 
 export function mountLeadForm(result, onSuccess, createAttachment) {
@@ -77,25 +94,41 @@ export function mountLeadForm(result, onSuccess, createAttachment) {
         console.warn('Não foi possível preparar a cópia em PDF para o e-mail.', error);
       }
 
+      const deliverCopy = async (isRetry = false) => {
+        try {
+          if (isRetry) emailStatus.textContent = 'Enviando outra cópia do relatório para o seu e-mail...';
+          const delivery = await sendAssessmentEmail(result, attachment);
+          if (delivery.pdfAttached) {
+            emailStatus.textContent = `O relatório em PDF foi encaminhado para ${data.email}. Pode levar alguns minutos; confira também a caixa de spam.`;
+            trackEvent('assessment_pdf_emailed', { messageId: delivery.messageId || null, retry: isRetry });
+          } else if (attachmentIssue === 'size') {
+            emailStatus.textContent = 'A confirmação foi encaminhada para o seu e-mail. O PDF ficou disponível para baixar abaixo porque ficou grande demais para anexar.';
+            trackEvent('assessment_email_sent', { attachment: 'too_large', retry: isRetry });
+          } else {
+            emailStatus.textContent = delivery.contactSaved
+              ? 'A confirmação foi encaminhada para o seu e-mail e seu contato foi registrado. O PDF segue disponível para baixar abaixo.'
+              : 'A confirmação foi encaminhada para o seu e-mail. O PDF segue disponível para baixar abaixo.';
+            trackEvent('assessment_email_sent', { attachment: attachmentIssue || 'not_available', retry: isRetry });
+          }
+        } catch (error) {
+          emailStatus.textContent = 'Seu relatório está liberado, mas não conseguimos encaminhar a cópia por e-mail agora. Use o botão abaixo para tentar novamente ou baixe o PDF.';
+          console.warn('O resultado foi liberado, mas o e-mail não pôde ser enviado.', error);
+          trackEvent('assessment_email_failed', { retry: isRetry });
+        }
+      };
+
       // O relatório continua disponível mesmo se a Brevo estiver temporariamente indisponível.
       try {
-        const delivery = await sendAssessmentEmail(result, attachment);
-        if (delivery.pdfAttached) {
-          emailStatus.textContent = `Enviamos o relatório em PDF para ${data.email}.`;
-          trackEvent('assessment_pdf_emailed');
-        } else if (attachmentIssue === 'size') {
-          emailStatus.textContent = 'Enviamos uma confirmação para o seu e-mail. O PDF ficou disponível para baixar abaixo porque ficou grande demais para anexar.';
-          trackEvent('assessment_email_sent', { attachment: 'too_large' });
-        } else {
-          emailStatus.textContent = delivery.contactSaved
-            ? 'Enviamos uma confirmação para o seu e-mail e cadastramos seu contato na Brevo. O PDF segue disponível para baixar abaixo.'
-            : 'Enviamos uma confirmação para o seu e-mail. O PDF segue disponível para baixar abaixo.';
-          trackEvent('assessment_email_sent', { attachment: attachmentIssue || 'not_available' });
-        }
-      } catch (error) {
-        emailStatus.textContent = 'Seu relatório está liberado. Não foi possível enviar a cópia por e-mail agora; você pode baixá-la abaixo.';
-        console.warn('O resultado foi liberado, mas o e-mail não pôde ser enviado.', error);
-        trackEvent('assessment_email_failed');
+        await deliverCopy();
+        addEmailRetry(reportActions, async event => {
+          const retry = event.currentTarget;
+          retry.disabled = true;
+          try {
+            await deliverCopy(true);
+          } finally {
+            retry.disabled = false;
+          }
+        });
       } finally {
         reportActions.removeAttribute('aria-busy');
       }
