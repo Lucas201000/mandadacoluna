@@ -3,7 +3,7 @@ export const STORAGE_KEY = 'mandalaDorAssessmentV1';
 // Dados de saúde informados no questionário permanecem somente neste navegador
 // durante um período curto, suficiente para retomar uma avaliação interrompida.
 export const LOCAL_STORAGE_TTL_MS = 24 * 60 * 60 * 1000;
-export const PRIVACY_POLICY_VERSION = '2026-09-14';
+export const PRIVACY_POLICY_VERSION = '2026-09-14.1';
 export const LEAD_RETENTION_DAYS = 90;
 export const PROJECT = {
   name: 'Mandala da Dor na Coluna', logo: 'M', professional: 'Lucas Gadoti Servelin', registration: 'CREFITO 275401-F',
@@ -76,17 +76,15 @@ export const STOREFRONT_CONTENT = {
 };
 export function trackEvent(eventName,eventData={}) { console.info('[Mandala analytics]',eventName,eventData); /* GA4 / Meta / TikTok / API futura aqui */ }
 export async function saveLead(leadData,assessmentData) {
-  // Nunca guardamos nome, e-mail ou WhatsApp em localStorage. O questionário
-  // já mantém o mínimo de progresso no dispositivo por prazo curto; o cadastro
-  // só é transmitido depois do consentimento específico para o relatório.
+  // O progresso temporário mantém o primeiro nome e as respostas autorizadas,
+  // mas nunca e-mail, WhatsApp ou preferência de marketing no localStorage.
+  // O cadastro só é transmitido depois do consentimento específico para o relatório.
   const consent = assessmentData.consent || {};
   const consentAt = consent.reportSensitiveDataConsentAt || consent.reportPrivacyAcknowledgedAt || new Date().toISOString();
-  const expiresAt = new Date(Date.now() + LEAD_RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
   const payload={
     assessmentId:assessmentData.assessmentId,
     savedAt:new Date().toISOString(),
-    consentVersion:PRIVACY_POLICY_VERSION,
-    expiresAt
+    consentVersion:PRIVACY_POLICY_VERSION
   };
 
   // O banco recebe apenas metadados de entrega e consentimento. As respostas,
@@ -104,7 +102,8 @@ export async function saveLead(leadData,assessmentData) {
       policyVersion: consent.policyVersion || PRIVACY_POLICY_VERSION,
       marketingConsentAt: consent.marketingConsentAt || null
     },
-    retention: { expiresAt }
+    // O prazo é calculado pelo padrão do banco, não pelo navegador.
+    retention: { policyDays: LEAD_RETENTION_DAYS }
   };
 
   if(!window.supabase) {
@@ -121,7 +120,6 @@ export async function saveLead(leadData,assessmentData) {
     sensitive_data_consent:Boolean(consent.reportSensitiveDataConsentAt),
     consent_version:consent.policyVersion || PRIVACY_POLICY_VERSION,
     consent_at:consentAt,
-    expires_at:expiresAt,
     assessment:deliveryMetadata
   });
   if(error) {

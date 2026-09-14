@@ -60,16 +60,17 @@ function normalizePdfAttachment(rawAttachment) {
 
 async function upsertBrevoContact({ apiKey, email, firstName, marketingConsent }) {
   // Lista "Mandala — conteúdos autorizados" criada na Brevo.
-  // A variável da Vercel continua tendo prioridade, permitindo trocar a lista sem editar código.
-  const marketingListId = Number.parseInt(process.env.BREVO_MARKETING_LIST_ID || '3', 10);
+  // A lista precisa ser configurada explicitamente no ambiente da Vercel.
+  const marketingListId = Number.parseInt(process.env.BREVO_MARKETING_LIST_ID || '', 10);
+  if (marketingConsent !== true || !Number.isInteger(marketingListId) || marketingListId <= 0) return false;
+
   const payload = {
     email: String(email).trim(),
-    updateEnabled: true
+    // Não atualiza contatos existentes a partir de uma solicitação pública.
+    updateEnabled: false,
+    listIds: [marketingListId]
   };
   if (firstName) payload.attributes = { FIRSTNAME: String(firstName).trim().slice(0, 100) };
-  if (marketingConsent && Number.isInteger(marketingListId) && marketingListId > 0) {
-    payload.listIds = [marketingListId];
-  }
 
   try {
     const contactResponse = await fetch('https://api.brevo.com/v3/contacts', {
@@ -78,12 +79,12 @@ async function upsertBrevoContact({ apiKey, email, firstName, marketingConsent }
       body: JSON.stringify(payload)
     });
     if (!contactResponse.ok) {
-      console.error('Brevo contact upsert failed:', contactResponse.status, await contactResponse.text());
+      console.error('Brevo contact request failed:', contactResponse.status);
       return false;
     }
     return true;
-  } catch (error) {
-    console.error('Brevo contact upsert error:', error);
+  } catch {
+    console.error('Brevo contact request failed unexpectedly.');
     return false;
   }
 }
@@ -139,7 +140,7 @@ const handler = async (request, response) => {
   try {
     // Contato de marketing só é criado na Brevo quando a pessoa opta por isso.
     // O envio transacional não precisa adicionar quem não autorizou comunicações.
-    const contactSaved = marketingConsent
+    const contactSaved = marketingConsent === true
       ? await upsertBrevoContact({ apiKey, email, firstName: normalizedFirstName, marketingConsent: true })
       : false;
     const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -157,7 +158,7 @@ const handler = async (request, response) => {
     });
     const brevoPayload = await brevoResponse.json().catch(() => ({}));
     if (!brevoResponse.ok) {
-      console.error('Brevo rejected transactional email:', brevoResponse.status, brevoPayload);
+      console.error('Brevo rejected transactional email:', brevoResponse.status);
       return json(response, 502, { error: 'Não foi possível enviar o e-mail agora.' });
     }
     // A resposta da Brevo confirma que a mensagem entrou na fila de envio.
@@ -169,8 +170,8 @@ const handler = async (request, response) => {
       pdfAttached: hasPdfAttachment,
       messageId: typeof brevoPayload.messageId === 'string' ? brevoPayload.messageId : null
     });
-  } catch (error) {
-    console.error('Brevo transactional email error:', error);
+  } catch {
+    console.error('Brevo transactional email request failed unexpectedly.');
     return json(response, 502, { error: 'Não foi possível enviar o e-mail agora.' });
   }
 };

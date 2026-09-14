@@ -1,0 +1,17 @@
+# Credenciais e configuração local
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Dependências e arquivos de execução
+node_modules/
+*.log
+
+# Chaves e certificados locais
+*.pem
+*.key
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db

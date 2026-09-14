@@ -107,7 +107,10 @@ function show() {
             <input required maxlength="60" name="name" value="${esc(result.user.firstName || '')}" autocomplete="given-name">
           </label>
           <label class="field">E-mail
-            <input required type="email" name="email" autocomplete="email">
+            <input required type="email" name="email" autocomplete="email" inputmode="email">
+          </label>
+          <label class="field">Confirme seu e-mail
+            <input required type="email" name="email-confirm" autocomplete="email" inputmode="email">
           </label>
           <label class="field full">WhatsApp
             <input type="tel" name="whatsapp" inputmode="tel" autocomplete="tel" minlength="8" placeholder="Opcional · (00) 00000-0000">
@@ -116,6 +119,7 @@ function show() {
           <label class="check full"><input type="checkbox" name="sensitive-data" required>Autorizo o tratamento das respostas de saúde para gerar meu relatório educativo, registrar o pedido mínimo e enviar uma cópia em PDF ao e-mail informado.</label>
           <label class="check full"><input type="checkbox" name="marketing">Autorizo receber conteúdos e recomendações (opcional).</label>
         </div>
+        <p class="small">Confira o e-mail com atenção: o PDF pode incluir informações pessoais sobre seus relatos de saúde.</p>
         <div class="actions"><button class="btn" type="submit">Liberar relatório completo</button></div>
       </form>
     </section>
@@ -129,7 +133,7 @@ function show() {
         <a class="btn ghost" href="index.html" id="restart">Refazer avaliação</a>
       </div>
     </section>
-    <footer class="footer"><a href="${PROJECT.privacyUrl}">Privacidade</a> · <a href="${PROJECT.termsUrl}">Termos</a> · ${PROJECT.healthNotice}</footer>`;
+    <footer class="footer"><a href="${PROJECT.privacyUrl}">Privacidade</a> · <a href="${PROJECT.termsUrl}">Termos</a> · <a href="${PROJECT.healthNoticeUrl}">Aviso de saúde</a></footer>`;
 
   const charts = renderCharts(result);
   trackEvent('result_viewed');

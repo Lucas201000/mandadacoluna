@@ -87,8 +87,8 @@ function home(resetViewport = true) {
         <li>Baixe um relatório personalizado em PDF.</li>
       </ul>
       ${button('Começar minha avaliação', 'btn', 'id="start"')}
-      <p class="notice">${PROJECT.healthNotice}</p>
-      <p class="small">Para sua privacidade, as respostas ficam somente neste navegador por até 24 horas. Evite usar um aparelho compartilhado.</p>
+      <p class="notice"><a href="${PROJECT.healthNoticeUrl}" target="_blank" rel="noopener">${PROJECT.healthNotice}</a></p>
+      <p class="small">Para sua privacidade, as respostas ficam em rascunho temporário neste navegador e expiram após até 24 horas de inatividade. Evite usar um aparelho compartilhado.</p>
     </section>
   `, resetViewport);
 
@@ -101,6 +101,11 @@ function home(resetViewport = true) {
 }
 
 function basic(resetViewport = true) {
+  const hasCurrentLocalConsent = Boolean(
+    state.consent?.localAssessmentConsentAt
+    && state.consent?.policyVersion === PRIVACY_POLICY_VERSION
+  );
+
   layout(`
     <section class="card">
       <p class="question-meta">ETAPA 1 DE 4</p>
@@ -126,7 +131,7 @@ function basic(resetViewport = true) {
           <label class="field">Intensidade atual: <output id="pain-output">${state.pain.intensity}/10</output>
             <input aria-label="Intensidade da dor de 0 a 10" type="range" min="0" max="10" name="intensity" value="${state.pain.intensity}">
           </label>
-          <label class="check full"><input required type="checkbox" name="local-health-consent" ${state.consent?.localAssessmentConsentAt ? 'checked' : ''}>Li a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a> e autorizo o uso temporário das respostas de saúde neste aparelho para gerar meu resultado educativo.</label>
+          <label class="check full"><input required type="checkbox" name="local-health-consent" ${hasCurrentLocalConsent ? 'checked' : ''}>Li a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a> e autorizo o uso temporário das respostas de saúde neste aparelho para gerar meu resultado educativo.</label>
           <label class="check full"><input required type="checkbox" name="adult-confirmation" ${state.consent?.adultConfirmedAt ? 'checked' : ''}>Confirmo que tenho 18 anos ou mais.</label>
         </div>
         <p class="error" id="form-error"></p>
@@ -153,7 +158,7 @@ function basic(resetViewport = true) {
     state.pain.intensity = Number(form.elements.intensity.value);
     state.consent = {
       ...state.consent,
-      localAssessmentConsentAt: state.consent?.localAssessmentConsentAt || new Date().toISOString(),
+      localAssessmentConsentAt: hasCurrentLocalConsent ? state.consent.localAssessmentConsentAt : new Date().toISOString(),
       adultConfirmedAt: state.consent?.adultConfirmedAt || new Date().toISOString(),
       policyVersion: PRIVACY_POLICY_VERSION
     };

@@ -65,6 +65,19 @@ export function mountLeadForm(result, onSuccess, createAttachment) {
       privacy: fields.privacy.checked,
       sensitiveData: fields['sensitive-data'].checked
     };
+    const confirmedEmail = fields['email-confirm'].value.trim();
+    if (data.email.toLowerCase() !== confirmedEmail.toLowerCase()) {
+      let message = form.querySelector('.submit-error');
+      if (!message) {
+        message = document.createElement('p');
+        message.className = 'error submit-error';
+        message.setAttribute('role', 'alert');
+        form.append(message);
+      }
+      message.textContent = 'Os dois e-mails precisam ser iguais para proteger o envio do relatório.';
+      fields['email-confirm'].focus();
+      return;
+    }
     const consentAt = new Date().toISOString();
     result.user = { ...result.user, firstName: data.name, email: data.email, whatsapp: data.whatsapp, marketingConsent: data.marketing };
     result.consent = {

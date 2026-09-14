@@ -42,6 +42,25 @@ alter table public.assessment_leads drop constraint if exists assessment_leads_w
 alter table public.assessment_leads add constraint assessment_leads_whatsapp_check
   check (whatsapp is null or char_length(whatsapp) between 8 and 25);
 
+-- Restringe o JSON a metadados de consentimento e entrega. NOT VALID preserva
+-- registros históricos sem apagá-los, mas aplica a regra a cada novo registro.
+alter table public.assessment_leads drop constraint if exists assessment_leads_minimal_metadata_check;
+alter table public.assessment_leads add constraint assessment_leads_minimal_metadata_check
+  check (
+    jsonb_typeof(assessment) = 'object'
+    and assessment ?& array['schema', 'reportRequestedAt', 'consent', 'retention']
+    and (assessment - array['schema', 'reportRequestedAt', 'consent', 'retention']) = '{}'::jsonb
+    and assessment->>'schema' = 'mandala-lead-minimo-v2'
+    and jsonb_typeof(assessment->'consent') = 'object'
+    and ((assessment->'consent') - array[
+      'privacyAcknowledgedAt', 'sensitiveDataConsentAt', 'localAssessmentConsentAt',
+      'adultConfirmedAt', 'policyVersion', 'marketingConsentAt'
+    ]) = '{}'::jsonb
+    and jsonb_typeof(assessment->'retention') = 'object'
+    and ((assessment->'retention') - array['policyDays']) = '{}'::jsonb
+    and assessment->'retention'->>'policyDays' = '90'
+  ) not valid;
+
 alter table public.assessment_leads enable row level security;
 grant insert on table public.assessment_leads to anon;
 
@@ -58,7 +77,8 @@ with check (
   and sensitive_data_consent is true
   and consent_version is not null
   and consent_at is not null
-  and expires_at <= now() + interval '100 days'
+  and expires_at >= now() + interval '89 days'
+  and expires_at <= now() + interval '91 days'
 );
 
 -- Rotina operacional necessária: revise e elimine ou anonimize registros
