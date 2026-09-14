@@ -1,9 +1,9 @@
-import { STORAGE_KEY } from './config.js';
+import { loadAssessment } from './storage.js';
 
 function mountPainScale() {
   const chart = document.querySelector('#module-chart');
   if (!chart || document.querySelector('#pain-scale-card')) return false;
-  const result = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+  const result = loadAssessment();
   const intensity = Math.max(0, Math.min(10, Number(result?.pain?.intensity ?? 0)));
   const card = document.createElement('section');
   card.className = 'card pain-scale-card';

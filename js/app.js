@@ -1,16 +1,18 @@
-import { PROJECT, STORAGE_KEY, trackEvent } from './config.js';
+import { PRIVACY_POLICY_VERSION, PROJECT, trackEvent } from './config.js';
 import { QUESTIONS, RED_FLAGS } from './questions.js';
 import { QUESTION_BREAKS } from './question-breaks.js';
 import { calculateResult } from './scoring.js';
+import { loadAssessment, saveAssessment } from './storage.js';
 
 const root = document.querySelector('#app');
-let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || {
+let state = loadAssessment() || {
   assessmentId: crypto.randomUUID?.() || String(Date.now()),
   createdAt: new Date().toISOString(),
   user: { firstName: '', ageRange: '', email: '', whatsapp: '' },
   pain: { intensity: 5, duration: '', mainRegion: '', additionalRegions: [], radiation: '' },
   answers: {},
   safety: { redFlagDetected: false, selectedRedFlags: [], noRedFlagsConfirmed: false },
+  consent: { localAssessmentConsentAt: null, policyVersion: PRIVACY_POLICY_VERSION },
   step: 'home',
   qIndex: 0,
   interstitial: null
@@ -29,7 +31,7 @@ const regions = [
 ];
 
 function persist() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  saveAssessment(state);
 }
 
 function resetStepViewport() {
@@ -86,6 +88,7 @@ function home(resetViewport = true) {
       </ul>
       ${button('Começar minha avaliação', 'btn', 'id="start"')}
       <p class="notice">${PROJECT.healthNotice}</p>
+      <p class="small">Para sua privacidade, as respostas ficam somente neste navegador por até 24 horas. Evite usar um aparelho compartilhado.</p>
     </section>
   `, resetViewport);
 
@@ -111,7 +114,7 @@ function basic(resetViewport = true) {
           <label class="field">Faixa etária
             <select required name="age">
               <option value="">Selecione</option>
-              ${['Até 24 anos', '25 a 34 anos', '35 a 44 anos', '45 a 54 anos', '55 a 64 anos', '65 anos ou mais', 'Prefiro não informar'].map(item => `<option ${state.user.ageRange === item ? 'selected' : ''}>${item}</option>`).join('')}
+              ${['18 a 24 anos', '25 a 34 anos', '35 a 44 anos', '45 a 54 anos', '55 a 64 anos', '65 anos ou mais', 'Prefiro não informar'].map(item => `<option ${state.user.ageRange === item ? 'selected' : ''}>${item}</option>`).join('')}
             </select>
           </label>
           <label class="field">Há quanto tempo sente a dor?
@@ -123,6 +126,8 @@ function basic(resetViewport = true) {
           <label class="field">Intensidade atual: <output id="pain-output">${state.pain.intensity}/10</output>
             <input aria-label="Intensidade da dor de 0 a 10" type="range" min="0" max="10" name="intensity" value="${state.pain.intensity}">
           </label>
+          <label class="check full"><input required type="checkbox" name="local-health-consent" ${state.consent?.localAssessmentConsentAt ? 'checked' : ''}>Li a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a> e autorizo o uso temporário das respostas de saúde neste aparelho para gerar meu resultado educativo.</label>
+          <label class="check full"><input required type="checkbox" name="adult-confirmation" ${state.consent?.adultConfirmedAt ? 'checked' : ''}>Confirmo que tenho 18 anos ou mais.</label>
         </div>
         <p class="error" id="form-error"></p>
         <div class="actions">
@@ -146,6 +151,12 @@ function basic(resetViewport = true) {
     state.user.ageRange = form.elements.age.value;
     state.pain.duration = form.elements.duration.value;
     state.pain.intensity = Number(form.elements.intensity.value);
+    state.consent = {
+      ...state.consent,
+      localAssessmentConsentAt: state.consent?.localAssessmentConsentAt || new Date().toISOString(),
+      adultConfirmedAt: state.consent?.adultConfirmedAt || new Date().toISOString(),
+      policyVersion: PRIVACY_POLICY_VERSION
+    };
     state.step = 'region';
     persist();
     trackEvent('personal_data_completed');
@@ -348,6 +359,7 @@ function safety(resetViewport = true) {
         ${noneOption('bottom')}
       </div>
       <p class="small">Você pode marcar a primeira ou a última opção caso nenhum sinal esteja presente.</p>
+      <p class="error" id="safety-error" role="alert"></p>
       <div class="actions">
         ${button('Ver meu resultado', 'btn', 'id="finish"')}
         ${button('Voltar', 'btn ghost', 'id="safety-back"')}
@@ -376,9 +388,14 @@ function safety(resetViewport = true) {
   });
 
   document.querySelector('#finish').onclick = () => {
+    if (!state.safety.noRedFlagsConfirmed && !(state.safety.selectedRedFlags || []).length) {
+      document.querySelector('#safety-error').textContent = 'Para continuar, marque algum sinal presente ou confirme que nenhum desses sinais está presente.';
+      return;
+    }
+
     const result = calculateResult(state);
     result.createdAt = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
+    saveAssessment(result);
     trackEvent(result.safety.redFlagDetected ? 'red_flag_detected' : 'assessment_completed');
     layout(`
       <section class="card loading" role="status" aria-live="polite">

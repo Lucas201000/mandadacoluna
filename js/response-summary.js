@@ -1,10 +1,10 @@
-import { STORAGE_KEY } from './config.js';
+import { loadAssessment } from './storage.js';
 import { QUESTIONS } from './questions.js';
 
 function mountResponseSummary() {
   const chart = document.querySelector('#module-chart');
   if (!chart || document.querySelector('#response-summary')) return false;
-  const result = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+  const result = loadAssessment();
   const selections = QUESTIONS.map(question => {
     const option = question.options.find(item => item.id === result?.answers?.[question.id]);
     return option ? { theme: question.theme, text: option.text } : null;

@@ -104,8 +104,13 @@ const handler = async (request, response) => {
   const senderName = process.env.BREVO_SENDER_NAME || 'Mandala da Dor na Coluna';
   if (!apiKey || !senderEmail) return json(response, 503, { error: 'O envio de e-mail ainda não está configurado.' });
 
-  const { firstName, email, assessmentId, primaryModule, redFlagDetected, marketingConsent, attachment } = request.body || {};
+  const { firstName, email, marketingConsent, privacyConsent, sensitiveDataConsent, attachment } = request.body || {};
+  const normalizedFirstName = String(firstName || '').trim();
   if (!EMAIL_PATTERN.test(String(email || '')) || !EMAIL_PATTERN.test(senderEmail)) return json(response, 400, { error: 'E-mail inválido.' });
+  if (!normalizedFirstName || normalizedFirstName.length > 60) return json(response, 400, { error: 'Nome inválido.' });
+  if (privacyConsent !== true || sensitiveDataConsent !== true) {
+    return json(response, 400, { error: 'É necessário autorizar o tratamento dos dados de saúde para enviar o relatório por e-mail.' });
+  }
 
   let pdfAttachment = null;
   try {
@@ -114,45 +119,40 @@ const handler = async (request, response) => {
     return json(response, 400, { error: 'Não foi possível validar o arquivo do relatório.' });
   }
 
-  const safeName = escapeHtml(String(firstName || ''));
-  const safeModule = escapeHtml(String(primaryModule || ''));
-  const safeAssessmentId = escapeHtml(String(assessmentId || ''));
-  const hasSafetyAlert = Boolean(redFlagDetected);
+  const safeName = escapeHtml(normalizedFirstName);
   const hasPdfAttachment = Boolean(pdfAttachment);
-  const title = hasSafetyAlert ? 'Sua avaliação educativa foi registrada' : 'Sua avaliação educativa está pronta';
-  const message = hasSafetyAlert
-    ? 'Suas respostas incluem sinais que merecem avaliação profissional. Isso não significa necessariamente algo grave, mas não deve ser analisado somente por um questionário online.'
-    : `Seu resultado educativo está disponível. O perfil predominante informado foi: ${safeModule || 'Mandala da Dor na Coluna'}.`;
+  const title = 'Seu relatório educativo está pronto';
+  const message = hasPdfAttachment
+    ? 'Você solicitou uma cópia do seu relatório educativo. O arquivo está anexado a este e-mail.'
+    : 'Você solicitou uma cópia do seu relatório educativo. A geração do anexo não foi concluída; o arquivo continua disponível para baixar na página em que a avaliação foi realizada.';
   const attachmentMessage = hasPdfAttachment
     ? '<p>Seu relatório educativo em PDF está anexado a este e-mail.</p>'
     : '';
-  const productBlock = hasSafetyAlert
-    ? ''
-    : `<p style="margin:24px 0"><a href="${SITE_URL}/vitrine.html" style="display:inline-block;background:#237A6B;color:#ffffff;padding:13px 18px;border-radius:10px;text-decoration:none;font-weight:700">Conhecer os módulos educativos</a></p>`;
-  const htmlContent = `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#F6F8FA;color:#18322F;font-family:Arial,sans-serif"><main style="max-width:620px;margin:0 auto;padding:28px"><section style="background:#ffffff;border:1px solid #DCE7E4;border-radius:16px;padding:30px"><p style="color:#237A6B;font-weight:700;letter-spacing:.08em;font-size:12px">MANDALA DA DOR NA COLUNA</p><h1 style="font-size:26px;line-height:1.2">${title}</h1><p>Olá${safeName ? `, ${safeName}` : ''}.</p><p>${message}</p>${attachmentMessage}${productBlock}<p style="font-size:13px;color:#60716F">Este e-mail e a avaliação possuem finalidade educativa e não substituem avaliação, diagnóstico ou tratamento profissional.</p><p style="font-size:12px;color:#60716F">Referência da avaliação: ${safeAssessmentId || 'não informada'}.</p></section></main></body></html>`;
+  const htmlContent = `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#F6F8FA;color:#18322F;font-family:Arial,sans-serif"><main style="max-width:620px;margin:0 auto;padding:28px"><section style="background:#ffffff;border:1px solid #DCE7E4;border-radius:16px;padding:30px"><p style="color:#237A6B;font-weight:700;letter-spacing:.08em;font-size:12px">MANDALA DA DOR NA COLUNA</p><h1 style="font-size:26px;line-height:1.2">${title}</h1><p>Olá${safeName ? `, ${safeName}` : ''}.</p><p>${message}</p>${attachmentMessage}<p style="font-size:13px;color:#60716F">Este e-mail e a avaliação possuem finalidade educativa e não substituem avaliação, diagnóstico ou tratamento profissional.</p></section></main></body></html>`;
   const textContent = [
     title,
-    `Olá${firstName ? `, ${String(firstName).trim()}` : ''}.`,
-    hasSafetyAlert
-      ? 'Suas respostas incluem sinais que merecem avaliação profissional. Isso não significa necessariamente algo grave, mas não deve ser analisado somente por um questionário online.'
-      : `Seu resultado educativo está disponível. O perfil predominante informado foi: ${String(primaryModule || 'Mandala da Dor na Coluna')}.`,
-    hasPdfAttachment ? 'Seu relatório educativo em PDF está anexado a este e-mail.' : '',
+    `Olá, ${normalizedFirstName}.`,
+    message,
     'Este e-mail e a avaliação possuem finalidade educativa e não substituem avaliação, diagnóstico ou tratamento profissional.'
   ].filter(Boolean).join('\n\n');
 
   try {
-    const contactSaved = await upsertBrevoContact({ apiKey, email, firstName, marketingConsent: Boolean(marketingConsent) });
+    // Contato de marketing só é criado na Brevo quando a pessoa opta por isso.
+    // O envio transacional não precisa adicionar quem não autorizou comunicações.
+    const contactSaved = marketingConsent
+      ? await upsertBrevoContact({ apiKey, email, firstName: normalizedFirstName, marketingConsent: true })
+      : false;
     const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: { 'api-key': apiKey, 'content-type': 'application/json', accept: 'application/json' },
       body: JSON.stringify({
         sender: { name: senderName, email: senderEmail },
-        to: [{ email: String(email).trim(), name: String(firstName || '').trim() }],
+        to: [{ email: String(email).trim(), name: normalizedFirstName }],
         subject: title,
         htmlContent,
         textContent,
         attachment: hasPdfAttachment ? [{ name: pdfAttachment.name, content: pdfAttachment.content }] : undefined,
-        tags: ['mandala-da-dor', hasSafetyAlert ? 'triagem-prioritaria' : 'resultado-educativo', ...(hasPdfAttachment ? ['relatorio-pdf'] : [])]
+        tags: ['mandala-da-dor', ...(hasPdfAttachment ? ['relatorio-pdf'] : [])]
       })
     });
     const brevoPayload = await brevoResponse.json().catch(() => ({}));

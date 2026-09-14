@@ -23,7 +23,15 @@ Depois de apontar um domínio próprio, troque `mandaladacoluna.vercel.app` por 
 
 ## Dados e integrações
 
-O progresso é armazenado em `localStorage`. Para salvar leads no Supabase, abra **SQL Editor** no projeto e execute [`supabase.sql`](supabase.sql). A integração usa somente a chave pública e uma política RLS de inserção; nunca inclua uma chave `service_role` no frontend. `trackEvent()` indica o ponto de integração com GA4 e pixels.
+### Privacidade da operação atual
+
+- As respostas do questionário podem revelar dados de saúde e ficam somente no navegador, por até 24 horas após a última atividade.
+- O usuário precisa aceitar a Política de Privacidade antes de persistir as respostas localmente.
+- Para liberar e receber o relatório, o usuário confirma a Política e dá consentimento específico para usar as respostas de saúde na geração e no envio do PDF.
+- WhatsApp é opcional. O Supabase recebe apenas nome, e-mail, WhatsApp se preenchido, escolha de marketing, metadados de consentimento e prazo de retenção. Respostas, pontuações, regiões e sinais de alerta não são enviados como lead.
+- O registro mínimo possui prazo operacional de 90 dias. Defina uma rotina interna para eliminar ou anonimizar registros expirados, respeitando obrigações legais e solicitações de titulares.
+
+Para adaptar a tabela existente, abra **SQL Editor** no Supabase e execute [`supabase.sql`](supabase.sql). A migração não apaga registros atuais, mas é obrigatória antes de publicar este código, pois inclui as colunas de consentimento e torna WhatsApp opcional. A integração usa somente a chave pública e uma política RLS de inserção; nunca inclua uma chave `service_role` no frontend. `trackEvent()` indica o ponto de integração com GA4 e pixels; não envie respostas de saúde, e-mail ou WhatsApp para plataformas de anúncios.
 
 ### E-mail transacional pela Brevo
 
@@ -35,7 +43,7 @@ A função protegida `api/send-assessment-email.js` prepara o mesmo relatório g
 - `PUBLIC_SITE_URL` (opcional): URL pública do site; atualmente `https://mandaladacoluna.vercel.app`.
 - `BREVO_MARKETING_LIST_ID` (opcional): ID da lista da Brevo para quem marcou a autorização de marketing.
 
-Nunca coloque `BREVO_API_KEY` no `js/config.js`, no GitHub ou em outro arquivo público. Depois de salvar as variáveis, faça um novo deploy pela Vercel ou envie um novo commit. Cada lead passa a ser cadastrado ou atualizado na Brevo. O anexo é limitado a 2,5 MB antes da codificação; se ele não puder ser anexado, a pessoa recebe a confirmação e ainda poderá baixar o PDF diretamente no site. O e-mail não contém as respostas completas do questionário; em caso de sinal de alerta, ele não inclui chamada comercial.
+Nunca coloque `BREVO_API_KEY` no `js/config.js`, no GitHub ou em outro arquivo público. Depois de salvar as variáveis, faça um novo deploy pela Vercel ou envie um novo commit. O e-mail transacional é enviado sem criar contato de marketing; a Brevo só recebe/cria o contato na lista de marketing quando a pessoa marcar a autorização opcional. O anexo é limitado a 2,5 MB antes da codificação; se ele não puder ser anexado, a pessoa recebe a confirmação e ainda poderá baixar o PDF diretamente no site. O e-mail não contém as respostas completas do questionário, sinal de alerta nem recomendação de módulo.
 
 ## PDF e testes
 
@@ -47,6 +55,6 @@ Adicione primeiro o módulo em `MODULES` e o produto correspondente em `MODULE_P
 
 ## Privacidade e saúde
 
-As páginas `privacidade.html`, `termos.html` e `aviso-saude.html` já estão ligadas no `config.js`. Revise seus textos, preencha responsável e canal de contato e valide juridicamente antes da publicação comercial. O aceite de marketing é separado do aceite necessário para gerar o relatório.
+As páginas `privacidade.html`, `termos.html` e `aviso-saude.html` já estão ligadas no `config.js`. O aceite de marketing é separado do consentimento necessário para gerar e enviar o relatório. Antes de publicidade em escala, mudanças de fornecedores ou criação de integrações de analytics, valide as práticas com assessoria jurídica e atualize a Política.
 
 O arquivo `vercel.json` adiciona cabeçalhos básicos de segurança para a publicação na Vercel.

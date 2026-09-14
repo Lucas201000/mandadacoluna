@@ -1,5 +1,10 @@
 // CENTRAL DE CONFIGURAÇÃO — edite aqui textos, links, produtos e dados de contato.
 export const STORAGE_KEY = 'mandalaDorAssessmentV1';
+// Dados de saúde informados no questionário permanecem somente neste navegador
+// durante um período curto, suficiente para retomar uma avaliação interrompida.
+export const LOCAL_STORAGE_TTL_MS = 24 * 60 * 60 * 1000;
+export const PRIVACY_POLICY_VERSION = '2026-09-14';
+export const LEAD_RETENTION_DAYS = 90;
 export const PROJECT = {
   name: 'Mandala da Dor na Coluna', logo: 'M', professional: 'Lucas Gadoti Servelin', registration: 'CREFITO 275401-F',
   email: 'clinicasetterlin@gmail.com', whatsapp: '5515996592799', storefrontUrl: 'vitrine.html',
@@ -71,20 +76,57 @@ export const STOREFRONT_CONTENT = {
 };
 export function trackEvent(eventName,eventData={}) { console.info('[Mandala analytics]',eventName,eventData); /* GA4 / Meta / TikTok / API futura aqui */ }
 export async function saveLead(leadData,assessmentData) {
-  const payload={leadData,assessmentId:assessmentData.assessmentId,savedAt:new Date().toISOString()};
-  localStorage.setItem('mandalaDorLeadV1',JSON.stringify(payload));
+  // Nunca guardamos nome, e-mail ou WhatsApp em localStorage. O questionário
+  // já mantém o mínimo de progresso no dispositivo por prazo curto; o cadastro
+  // só é transmitido depois do consentimento específico para o relatório.
+  const consent = assessmentData.consent || {};
+  const consentAt = consent.reportSensitiveDataConsentAt || consent.reportPrivacyAcknowledgedAt || new Date().toISOString();
+  const expiresAt = new Date(Date.now() + LEAD_RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const payload={
+    assessmentId:assessmentData.assessmentId,
+    savedAt:new Date().toISOString(),
+    consentVersion:PRIVACY_POLICY_VERSION,
+    expiresAt
+  };
+
+  // O banco recebe apenas metadados de entrega e consentimento. As respostas,
+  // regiões, intensidade, sinais de alerta e pontuações não são enviados ao
+  // Supabase como lead. O PDF é gerado no navegador e segue por e-mail apenas
+  // quando a pessoa autoriza expressamente esse envio.
+  const deliveryMetadata = {
+    schema: 'mandala-lead-minimo-v2',
+    reportRequestedAt: payload.savedAt,
+    consent: {
+      privacyAcknowledgedAt: consent.reportPrivacyAcknowledgedAt || null,
+      sensitiveDataConsentAt: consent.reportSensitiveDataConsentAt || null,
+      localAssessmentConsentAt: consent.localAssessmentConsentAt || null,
+      adultConfirmedAt: consent.adultConfirmedAt || null,
+      policyVersion: consent.policyVersion || PRIVACY_POLICY_VERSION,
+      marketingConsentAt: consent.marketingConsentAt || null
+    },
+    retention: { expiresAt }
+  };
+
   if(!window.supabase) {
-    console.warn('Biblioteca do Supabase não foi carregada. O lead ficará disponível no dispositivo e na Brevo.');
-    return {...payload,remoteSaved:false};
+    throw new Error('Não foi possível registrar a autorização para o relatório agora.');
   }
   const client=window.supabase.createClient(SUPABASE_CONFIG.url,SUPABASE_CONFIG.publishableKey);
   const {error}=await client.from(SUPABASE_CONFIG.table).insert({
-    assessment_id:assessmentData.assessmentId, first_name:leadData.name, email:leadData.email,
-    whatsapp:leadData.whatsapp, marketing_consent:leadData.marketing, assessment:assessmentData
+    assessment_id:assessmentData.assessmentId,
+    first_name:leadData.name,
+    email:leadData.email,
+    whatsapp:leadData.whatsapp || null,
+    marketing_consent:Boolean(leadData.marketing),
+    privacy_consent:Boolean(consent.reportPrivacyAcknowledgedAt),
+    sensitive_data_consent:Boolean(consent.reportSensitiveDataConsentAt),
+    consent_version:consent.policyVersion || PRIVACY_POLICY_VERSION,
+    consent_at:consentAt,
+    expires_at:expiresAt,
+    assessment:deliveryMetadata
   });
   if(error) {
-    console.warn('Não foi possível salvar no Supabase. O lead ficará disponível no dispositivo e na Brevo.',error);
-    return {...payload,remoteSaved:false};
+    console.warn('Não foi possível salvar o cadastro mínimo no Supabase.',error);
+    throw new Error('Não foi possível registrar a autorização para o relatório agora.');
   }
   console.info('[Mandala lead salvo no Supabase]',assessmentData.assessmentId);
   return {...payload,remoteSaved:true};

@@ -1,7 +1,7 @@
-import { STORAGE_KEY } from './config.js';
 import { calculateResult } from './scoring.js';
+import { loadAssessment } from './storage.js';
 
-const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+const stored = loadAssessment();
 
 if (stored?.answers) {
   const product = calculateResult(stored).recommendedProduct;

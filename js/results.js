@@ -1,8 +1,9 @@
-import { PROJECT, STORAGE_KEY, MODULES, trackEvent } from './config.js';
+import { PROJECT, MODULES, trackEvent } from './config.js';
 import { calculateResult } from './scoring.js';
 import { renderCharts } from './charts.js';
 import { mountLeadForm } from './lead.js';
 import { createPdfAttachment, generatePdf } from './pdf-generator.js';
+import { clearAssessment, loadAssessment, saveAssessment } from './storage.js';
 
 const root = document.querySelector('#result-app');
 const esc = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
@@ -13,7 +14,7 @@ const esc = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
   '"': '&quot;'
 }[char]));
 
-let result = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+let result = loadAssessment();
 
 if (!result || !result.answers) {
   root.innerHTML = `
@@ -24,7 +25,7 @@ if (!result || !result.answers) {
     </section>`;
 } else {
   result = calculateResult(result);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
+  saveAssessment(result);
   show();
 }
 
@@ -103,15 +104,16 @@ function show() {
       <form id="lead-form">
         <div class="form-grid">
           <label class="field">Nome
-            <input required name="name" value="${esc(result.user.firstName || '')}" autocomplete="given-name">
+            <input required maxlength="60" name="name" value="${esc(result.user.firstName || '')}" autocomplete="given-name">
           </label>
           <label class="field">E-mail
             <input required type="email" name="email" autocomplete="email">
           </label>
           <label class="field full">WhatsApp
-            <input required type="tel" name="whatsapp" inputmode="tel" autocomplete="tel" minlength="8" placeholder="(00) 00000-0000">
+            <input type="tel" name="whatsapp" inputmode="tel" autocomplete="tel" minlength="8" placeholder="Opcional · (00) 00000-0000">
           </label>
-          <label class="check full"><input type="checkbox" name="privacy" required>Li e aceito a <a href="${PROJECT.privacyUrl}">política de privacidade</a> para gerar o relatório.</label>
+          <label class="check full"><input type="checkbox" name="privacy" required>Li a <a href="${PROJECT.privacyUrl}" target="_blank" rel="noopener">Política de Privacidade</a> e estou ciente de como meus dados serão tratados.</label>
+          <label class="check full"><input type="checkbox" name="sensitive-data" required>Autorizo o tratamento das respostas de saúde para gerar meu relatório educativo, registrar o pedido mínimo e enviar uma cópia em PDF ao e-mail informado.</label>
           <label class="check full"><input type="checkbox" name="marketing">Autorizo receber conteúdos e recomendações (opcional).</label>
         </div>
         <div class="actions"><button class="btn" type="submit">Liberar relatório completo</button></div>
@@ -169,7 +171,7 @@ function show() {
 
   document.querySelector('#print').onclick = () => window.print();
   document.querySelector('#restart').onclick = () => {
-    localStorage.removeItem(STORAGE_KEY);
+    clearAssessment();
     trackEvent('assessment_restarted');
   };
 }

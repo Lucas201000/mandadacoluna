@@ -1,4 +1,5 @@
-import { MODULES, saveLead, trackEvent } from './config.js';
+import { PRIVACY_POLICY_VERSION, saveLead, trackEvent } from './config.js';
+import { saveAssessment } from './storage.js';
 
 // Mantém o corpo enviado à função da Vercel abaixo do limite seguro, mesmo após o Base64.
 const MAX_EMAIL_PDF_BYTES = Math.floor(2.5 * 1024 * 1024);
@@ -11,9 +12,9 @@ async function sendAssessmentEmail(result, attachment = null) {
       assessmentId: result.assessmentId,
       firstName: result.user.firstName,
       email: result.user.email,
-      primaryModule: MODULES[result.primaryModule]?.name || '',
-      redFlagDetected: result.safety.redFlagDetected,
       marketingConsent: Boolean(result.user.marketingConsent),
+      privacyConsent: Boolean(result.consent?.reportPrivacyAcknowledgedAt),
+      sensitiveDataConsent: Boolean(result.consent?.reportSensitiveDataConsentAt),
       attachment: attachment ? { name: attachment.name, content: attachment.content } : undefined
     })
   });
@@ -57,11 +58,23 @@ export function mountLeadForm(result, onSuccess, createAttachment) {
     if (!form.reportValidity()) return;
 
     const submit = form.querySelector('[type="submit"]');
+    const fields = form.elements;
     const data = {
-      name: form.name.value.trim(), email: form.email.value.trim(), whatsapp: form.whatsapp.value.trim(),
-      marketing: form.marketing.checked, privacy: form.privacy.checked
+      name: fields.name.value.trim(), email: fields.email.value.trim(), whatsapp: fields.whatsapp.value.trim(),
+      marketing: fields.marketing.checked,
+      privacy: fields.privacy.checked,
+      sensitiveData: fields['sensitive-data'].checked
     };
+    const consentAt = new Date().toISOString();
     result.user = { ...result.user, firstName: data.name, email: data.email, whatsapp: data.whatsapp, marketingConsent: data.marketing };
+    result.consent = {
+      ...result.consent,
+      policyVersion: PRIVACY_POLICY_VERSION,
+      reportPrivacyAcknowledgedAt: data.privacy ? consentAt : null,
+      reportSensitiveDataConsentAt: data.sensitiveData ? consentAt : null,
+      marketingConsentAt: data.marketing ? consentAt : null
+    };
+    saveAssessment(result);
     submit.disabled = true;
     submit.textContent = 'Salvando com segurança...';
 
@@ -134,10 +147,14 @@ export function mountLeadForm(result, onSuccess, createAttachment) {
       }
     } catch (error) {
       console.error(error);
-      const message = document.createElement('p');
-      message.className = 'error';
-      message.textContent = 'Não foi possível liberar o relatório agora. Verifique sua conexão e tente novamente.';
-      form.append(message);
+      let message = form.querySelector('.submit-error');
+      if (!message) {
+        message = document.createElement('p');
+        message.className = 'error submit-error';
+        message.setAttribute('role', 'alert');
+        form.append(message);
+      }
+      message.textContent = 'Não foi possível registrar sua autorização para o relatório agora. Verifique a conexão e tente novamente.';
     } finally {
       submit.disabled = false;
       submit.textContent = 'Liberar relatório completo';
