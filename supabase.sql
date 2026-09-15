@@ -86,3 +86,87 @@ with check (
 -- solicitação do titular que justifique tratamento diferente. Não automatize
 -- essa exclusão sem validar a rotina e as obrigações da clínica.
 -- O navegador público não tem permissão para consultar os registros.
+
+-- CONFIRMAÇÃO DE E-MAIL — estado efêmero, sem dados de saúde ou contato.
+-- O token completo permanece apenas entre o navegador e a função da Vercel.
+-- Aqui é mantido somente o hash irreversível do token, por poucos minutos,
+-- para que expiração, tentativas e uso único funcionem entre instâncias.
+create schema if not exists private;
+
+create table if not exists private.mandala_report_email_tokens (
+  token_hash text primary key check (token_hash ~ '^[a-f0-9]{64}$'),
+  created_at timestamptz not null default clock_timestamp(),
+  expires_at timestamptz not null,
+  attempts smallint not null default 0 check (attempts between 0 and 5),
+  consumed_at timestamptz
+);
+
+alter table private.mandala_report_email_tokens enable row level security;
+revoke all on schema private from public, anon, authenticated;
+revoke all on table private.mandala_report_email_tokens from public, anon, authenticated;
+
+-- Registra um token recém-gerado. A função não recebe e-mail, nome, PDF,
+-- respostas ou código; por isso uma chamada direta não revela dados pessoais.
+create or replace function public.mandala_register_report_token(
+  p_token_hash text,
+  p_expires_at timestamptz
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = pg_catalog, private
+as $$
+begin
+  if p_token_hash !~ '^[a-f0-9]{64}$' then
+    return false;
+  end if;
+  if p_expires_at <= clock_timestamp() or p_expires_at > clock_timestamp() + interval '16 minutes' then
+    return false;
+  end if;
+
+  -- Limpeza automática de identificadores já inúteis; não envolve leads.
+  delete from private.mandala_report_email_tokens
+  where expires_at < clock_timestamp() - interval '1 day';
+
+  insert into private.mandala_report_email_tokens (token_hash, expires_at)
+  values (p_token_hash, p_expires_at)
+  on conflict (token_hash) do nothing;
+  return true;
+end;
+$$;
+
+-- Consome atomicamente o token. Uma tentativa inválida também conta; o token
+-- correto só pode devolver true uma vez e nenhuma informação pessoal retorna.
+create or replace function public.mandala_consume_report_token(
+  p_token_hash text,
+  p_code_valid boolean
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = pg_catalog, private
+as $$
+declare
+  accepted boolean;
+begin
+  if p_token_hash !~ '^[a-f0-9]{64}$' then
+    return false;
+  end if;
+
+  update private.mandala_report_email_tokens
+     set attempts = attempts + 1,
+         consumed_at = case when p_code_valid then clock_timestamp() else consumed_at end
+   where token_hash = p_token_hash
+     and expires_at > clock_timestamp()
+     and consumed_at is null
+     and attempts < 5
+  returning p_code_valid into accepted;
+
+  return coalesce(accepted, false);
+end;
+$$;
+
+revoke all on function public.mandala_register_report_token(text, timestamptz) from public, authenticated;
+revoke all on function public.mandala_consume_report_token(text, boolean) from public, authenticated;
+grant execute on function public.mandala_register_report_token(text, timestamptz) to anon;
+grant execute on function public.mandala_consume_report_token(text, boolean) to anon;

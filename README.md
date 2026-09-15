@@ -46,6 +46,8 @@ A função protegida `api/send-assessment-email.js` primeiro envia um código te
 
 Nunca coloque `BREVO_API_KEY` ou `EMAIL_VERIFICATION_SECRET` no `js/config.js`, no GitHub ou em outro arquivo público. Depois de salvar as variáveis, faça um novo deploy pela Vercel ou envie um novo commit. O e-mail transacional é enviado sem criar contato de marketing; a Brevo só recebe/cria o contato na lista de marketing quando a pessoa marcar a autorização opcional. O anexo é limitado a 2,5 MB antes da codificação; se ele não puder ser anexado, a pessoa recebe a confirmação e ainda poderá baixar o PDF diretamente no site. O e-mail não contém as respostas completas do questionário, sinal de alerta nem recomendação de módulo.
 
+Os códigos têm validade de 15 minutos, registram no máximo cinco tentativas e só podem ser usados uma vez. O Supabase armazena somente o hash temporário do token para esse controle; não armazena código, e-mail, PDF ou respostas de saúde nessa tabela.
+
 ## PDF e testes
 
 O PDF usa jsPDF e os gráficos Chart.js por CDN. Conclua uma avaliação, preencha o formulário de liberação e confirme o código enviado ao e-mail. O site manterá o botão **Baixar relatório em PDF** disponível mesmo se a entrega do e-mail falhar. Verifique: gráficos visíveis, texto sem corte, nome com acentos, código recebido, anexo recebido, link clicável do produto e o comportamento no Safari do iPhone (onde o PDF pode abrir em prévia). A triagem com qualquer sinal de alerta deve exibir prioridade profissional e ocultar a recomendação comercial principal.

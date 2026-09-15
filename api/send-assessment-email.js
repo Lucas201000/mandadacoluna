@@ -5,11 +5,10 @@ const SITE_URL = (process.env.PUBLIC_SITE_URL || 'https://mandaladacoluna.vercel
 const RATE_WINDOW_MS = 15 * 60 * 1000;
 const MAX_REQUESTS_PER_WINDOW = 5;
 const MAX_PDF_BYTES = Math.floor(2.5 * 1024 * 1024);
+const SUPABASE_URL = (process.env.SUPABASE_URL || 'https://dsgsksamlcyfrqrthjpa.supabase.co').replace(/\/$/, '');
+const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_0wXE1wh-DwyeJClziFs9BQ_ZKG5ZxtO';
 const requestWindows = new Map();
-const verificationAttempts = new Map();
-const usedVerificationTokens = new Map();
 const VERIFICATION_TTL_MS = 15 * 60 * 1000;
-const MAX_VERIFICATION_ATTEMPTS = 5;
 
 function allowRequest(request) {
   const now = Date.now();
@@ -150,22 +149,41 @@ function verifyCode(payload, code, keys) {
   return secureEqual(payload.codeProof, expectedProof);
 }
 
-function pruneVerificationState() {
-  const now = Date.now();
-  for (const [token, entry] of verificationAttempts) {
-    if (entry.expiresAt <= now) verificationAttempts.delete(token);
-  }
-  for (const [token, expiresAt] of usedVerificationTokens) {
-    if (expiresAt <= now) usedVerificationTokens.delete(token);
-  }
+function verificationTokenHash(token) {
+  return crypto.createHash('sha256').update(String(token)).digest('hex');
 }
 
-function allowVerificationAttempt(token, expiresAt) {
-  pruneVerificationState();
-  const current = verificationAttempts.get(token) || { count: 0, expiresAt };
-  if (current.count >= MAX_VERIFICATION_ATTEMPTS) return false;
-  verificationAttempts.set(token, { count: current.count + 1, expiresAt });
-  return true;
+async function callVerificationRpc(name, payload) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      'content-type': 'application/json',
+      accept: 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok) {
+    console.error('Supabase verification RPC failed:', name, response.status);
+    throw new Error('Serviço de confirmação indisponível.');
+  }
+  return result === true;
+}
+
+async function registerVerificationToken(token, expiresAt) {
+  return callVerificationRpc('mandala_register_report_token', {
+    p_token_hash: verificationTokenHash(token),
+    p_expires_at: new Date(expiresAt).toISOString()
+  });
+}
+
+async function consumeVerificationToken(token, codeIsValid) {
+  return callVerificationRpc('mandala_consume_report_token', {
+    p_token_hash: verificationTokenHash(token),
+    p_code_valid: codeIsValid === true
+  });
 }
 
 async function upsertBrevoContact({ apiKey, email, firstName, marketingConsent }) {
@@ -260,6 +278,8 @@ const handler = async (request, response) => {
     });
 
     try {
+      const registered = await registerVerificationToken(verification.token, verification.expiresAt);
+      if (!registered) return json(response, 503, { error: 'Não foi possível preparar a confirmação agora.' });
       const sent = await sendVerificationCode({
         apiKey,
         senderEmail: normalizedSenderEmail,
@@ -282,15 +302,17 @@ const handler = async (request, response) => {
 
   const verificationToken = String(body.verificationToken || '');
   const verification = readVerification(verificationToken, keys);
-  if (!verification || usedVerificationTokens.has(verificationToken)) {
-    return json(response, 400, { error: 'O código expirou ou já foi usado. Solicite um novo código.' });
+  if (!verification) return json(response, 400, { error: 'O código expirou ou já foi usado. Solicite um novo código.' });
+
+  const codeIsValid = verifyCode(verification, body.verificationCode, keys);
+  let verificationConsumed = false;
+  try {
+    verificationConsumed = await consumeVerificationToken(verificationToken, codeIsValid);
+  } catch {
+    return json(response, 503, { error: 'Não foi possível validar o código agora. Tente novamente.' });
   }
-  if (!allowVerificationAttempt(verificationToken, verification.expiresAt)) {
-    return json(response, 429, { error: 'Muitas tentativas com este código. Solicite um novo código.' });
-  }
-  if (!verifyCode(verification, body.verificationCode, keys)) {
-    return json(response, 400, { error: 'Código de confirmação inválido.' });
-  }
+  if (!verificationConsumed && codeIsValid) return json(response, 400, { error: 'O código expirou ou já foi usado. Solicite um novo código.' });
+  if (!codeIsValid) return json(response, 400, { error: 'Código de confirmação inválido.' });
 
   let pdfAttachment = null;
   try {
@@ -342,7 +364,6 @@ const handler = async (request, response) => {
       console.error('Brevo rejected transactional email:', brevoResponse.status);
       return json(response, 502, { error: 'Não foi possível enviar o e-mail agora.' });
     }
-    usedVerificationTokens.set(verificationToken, verification.expiresAt);
     // A resposta da Brevo confirma que a mensagem entrou na fila de envio.
     // O identificador permite localizar a entrega nos Logs transacionais,
     // sem expor chaves ou dados sensíveis ao navegador.
