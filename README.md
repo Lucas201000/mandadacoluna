@@ -52,6 +52,12 @@ Os códigos têm validade de 15 minutos, registram no máximo cinco tentativas e
 
 O PDF usa jsPDF e os gráficos Chart.js por CDN. Conclua uma avaliação, preencha o formulário de liberação e confirme o código enviado ao e-mail. O site manterá o botão **Baixar relatório em PDF** disponível mesmo se a entrega do e-mail falhar. Verifique: gráficos visíveis, texto sem corte, nome com acentos, código recebido, anexo recebido, link clicável do produto e o comportamento no Safari do iPhone (onde o PDF pode abrir em prévia). A triagem com qualquer sinal de alerta deve exibir prioridade profissional e ocultar a recomendação comercial principal.
 
+### Aula experimental e continuidade
+
+Cada botão de módulo abre `aula-experimental.html?modulo=...`, uma página própria da Mandala com a Aula 1 gratuita. Edite `MODULE_TRIAL_LESSONS` em `js/config.js` e informe em `videoUrl` uma URL direta de MP4, YouTube ou Vimeo. Para não pesar o site, hospede os vídeos fora do repositório. Se usar YouTube ou Vimeo, inclua o fornecedor na Política de Privacidade antes de ativar o vídeo.
+
+Copie o HotLink real de cada produto em **Hotmart → Produtos → Links de divulgação** e cole-o em `HOTMART_CHECKOUT_URLS`. A CTA “Continuar para a aula 2” só aparece como link quando o HotLink correspondente estiver configurado. Após a compra, a página orienta o aluno a entrar na Flowlink usando o mesmo e-mail utilizado no checkout; a liberação automática depende da integração operacional entre Hotmart e Flowlink.
+
 ## Novos módulos
 
 Adicione primeiro o módulo em `MODULES` e o produto correspondente em `MODULE_PRODUCTS`, depois inclua a nova chave nas funções de pontuação e nas perguntas. Atualize gráficos e textos para refletir a mudança.

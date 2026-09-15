@@ -239,7 +239,7 @@ async function buildAssessmentPdf(result, charts) {
     result.safety.redFlagDetected ? 'Próximo passo com prioridade' : `Conheça o Módulo ${primary.id}`,
     result.safety.redFlagDetected
       ? 'Priorize atendimento profissional antes de considerar uma recomendação comercial.'
-      : 'Acesse o conteúdo correspondente ao perfil predominante.'
+      : (product.trialUrlConfigured ? 'Comece pela Aula 1 gratuita do conteúdo correspondente ao perfil predominante.' : 'Conheça o conteúdo correspondente ao perfil predominante.')
   );
   const productCardY = Math.max(55, nextTitleBottom + 9);
   pdf.setFont('helvetica', 'bold');
@@ -268,7 +268,7 @@ async function buildAssessmentPdf(result, charts) {
     pdf.setTextColor(255);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(14);
-    pdf.text(`Acessar o Módulo ${primary.id}`, PAGE.margin + 8, buttonY + 11);
+    pdf.text(product.trialUrlConfigured ? `Assistir à Aula 1 do Módulo ${primary.id}` : `Acessar o Módulo ${primary.id}`, PAGE.margin + 8, buttonY + 11);
     pdf.link(PAGE.margin, buttonY, PAGE.contentWidth, 16, { url: productUrl });
 
     pdf.setTextColor(24, 50, 47);

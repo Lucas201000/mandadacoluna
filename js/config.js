@@ -8,10 +8,10 @@ export const LEAD_RETENTION_DAYS = 90;
 export const PROJECT = {
   name: 'Mandala da Dor na Coluna', logo: 'M', professional: 'Lucas Gadoti Servelin', registration: 'CREFITO 275401-F',
   email: 'clinicasetterlin@gmail.com', whatsapp: '5515996592799', storefrontUrl: 'vitrine.html',
-  // Entrada geral da plataforma. Os links individuais das aulas ficam logo abaixo.
-  // Endereço público atual da área de aulas. Mantenha a barra final para
-  // que o mesmo endereço seja usado nos botões, vitrine e relatório em PDF.
+  // Entrada da área paga. Depois da compra, a pessoa deve entrar na Flowlink
+  // usando o mesmo e-mail usado no checkout da Hotmart.
   flowlinkUrl: 'https://clinica-setterlin.flowlink-app.online/',
+  trialLessonUrl: 'aula-experimental.html',
   privacyUrl: 'privacidade.html', termsUrl: 'termos.html', healthNoticeUrl: 'aviso-saude.html',
   healthNotice: 'Esta ferramenta possui finalidade educativa e não substitui avaliação, diagnóstico ou tratamento profissional.'
 };
@@ -44,11 +44,22 @@ export const HOTMART_PRODUCT_IDS = {
   combo: ''
 };
 
-// FLOWLINK — cole o endereço individual de cada aula experimental aqui.
-// Exemplo: https://clinica-setterlin.flowlink-app.online/curso/modulo-3/aula-experimental
-// Enquanto um endereço individual não estiver confirmado, o botão abre a entrada
-// da plataforma, sem exibir preço ou checkout no site.
-export const FLOWLINK_TRIAL_URLS = {
+// HOTMART — cole aqui o HotLink/checkout exato copiado em
+// Produtos > Links de divulgação. Não monte a URL apenas com o ID interno.
+// A Aula 2 usa estes links; o site não exibe preço antes do checkout.
+export const HOTMART_CHECKOUT_URLS = {
+  inflamatoria: '',
+  muscular: '',
+  compressao: '',
+  rigidez: '',
+  encurtamento: '',
+  instabilidade: '',
+  combo: ''
+};
+
+// FLOWLINK — se existir uma entrada específica para cada módulo pago, cole-a
+// aqui. Enquanto isso, o botão usa a entrada geral da área do aluno.
+export const FLOWLINK_MEMBER_URLS = {
   inflamatoria: '',
   muscular: '',
   compressao: '',
@@ -57,14 +68,64 @@ export const FLOWLINK_TRIAL_URLS = {
   instabilidade: ''
 };
 
+// AULA EXPERIMENTAL — hospede a primeira aula em um provedor de vídeo e cole
+// uma URL direta .mp4, um link incorporável do YouTube ou do Vimeo.
+// Não suba vídeos grandes diretamente neste repositório/Vercel.
+export const MODULE_TRIAL_LESSONS = {
+  inflamatoria: {
+    title: 'Como começar quando a dor está mais irritada',
+    focus: 'Movimentos iniciais, conforto e sinais para respeitar durante a prática.',
+    videoUrl: '',
+    outcomes: ['Entender o objetivo educativo do módulo', 'Começar com movimentos confortáveis', 'Saber quando pausar e procurar avaliação profissional']
+  },
+  muscular: {
+    title: 'Primeiros passos para lidar com a tensão muscular',
+    focus: 'Como observar a tensão acumulada e organizar movimentos simples no dia a dia.',
+    videoUrl: '',
+    outcomes: ['Reconhecer sinais comuns de tensão', 'Aprender uma rotina inicial confortável', 'Preparar o corpo para os próximos passos']
+  },
+  compressao: {
+    title: 'Como observar sintomas que se espalham com segurança',
+    focus: 'Cuidados educativos para relatos de irradiação ou sensibilidade nervosa.',
+    videoUrl: '',
+    outcomes: ['Entender o objetivo do módulo', 'Identificar limites de conforto', 'Reconhecer quando é importante buscar avaliação profissional']
+  },
+  rigidez: {
+    title: 'Começando a recuperar confiança para se mover',
+    focus: 'Movimentos leves e graduais para quem relata sensação de rigidez ou trava.',
+    videoUrl: '',
+    outcomes: ['Observar a mobilidade sem forçar', 'Entender a progressão gradual', 'Começar com um movimento educativo simples']
+  },
+  encurtamento: {
+    title: 'Mobilidade e sensação de músculos puxando',
+    focus: 'Uma introdução educativa à flexibilidade feita com progressão e conforto.',
+    videoUrl: '',
+    outcomes: ['Reconhecer o limite confortável', 'Evitar forçar alongamentos', 'Entender como a progressão será construída']
+  },
+  instabilidade: {
+    title: 'Criando uma base de controle e estabilidade',
+    focus: 'Princípios iniciais de respiração, controle de movimento e firmeza corporal.',
+    videoUrl: '',
+    outcomes: ['Entender a base do controle corporal', 'Conhecer o objetivo dos exercícios iniciais', 'Preparar-se para progredir com segurança']
+  }
+};
+
 export const MODULE_PRODUCTS = Object.fromEntries(Object.values(MODULES).map(m=>[m.key,{
   moduleId:m.id,name:`Módulo ${m.id} — ${['Acalmando a dor irritada','Alívio da tensão muscular','Dor irradiada e nervo sensível','Recuperando a mobilidade','Flexibilidade e músculos encurtados','Força, estabilidade e controle'][m.id-1]}`,
   slug:['dor-inflamatoria','dor-muscular','compressao','rigidez','encurtamento','instabilidade'][m.id-1], productUrl:`vitrine.html?produto=${['dor-inflamatoria','dor-muscular','compressao','rigidez','encurtamento','instabilidade'][m.id-1]}`,
   image:`assets/images/produto-modulo-${m.id}.jpg`,
   hotmartProductId: HOTMART_PRODUCT_IDS[m.key],
-  // A experiência comercial acontece no Flowlink, depois da aula experimental.
-  trialUrl: FLOWLINK_TRIAL_URLS[m.key] || PROJECT.flowlinkUrl,
-  trialUrlConfigured: Boolean(FLOWLINK_TRIAL_URLS[m.key]),
+  // A degustação passa a ser a entrada pública assim que o vídeo da Aula 1
+  // estiver configurado. Até lá, preserva a entrada atual da Flowlink.
+  trialPageUrl: `${PROJECT.trialLessonUrl}?modulo=${m.key}`,
+  trialUrl: MODULE_TRIAL_LESSONS[m.key].videoUrl
+    ? `${PROJECT.trialLessonUrl}?modulo=${m.key}`
+    : (FLOWLINK_MEMBER_URLS[m.key] || PROJECT.flowlinkUrl),
+  trialUrlConfigured: Boolean(MODULE_TRIAL_LESSONS[m.key].videoUrl),
+  checkoutUrl: HOTMART_CHECKOUT_URLS[m.key] || '',
+  comboCheckoutUrl: HOTMART_CHECKOUT_URLS.combo || '',
+  flowlinkUrl: FLOWLINK_MEMBER_URLS[m.key] || PROJECT.flowlinkUrl,
+  lesson: MODULE_TRIAL_LESSONS[m.key],
   shortDescription:m.recommendation, color:m.color
 }]));
 // Depoimentos provisórios — substitua somente por relatos reais autorizados.

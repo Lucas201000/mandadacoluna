@@ -30,9 +30,11 @@ if (!result || !result.answers) {
 }
 
 function recommendedModuleCard(module, product, placement, compact = false) {
+  const trialReady = product.trialUrlConfigured;
   const description = compact
-    ? 'Aula experimental disponível para você conhecer o conteúdo deste módulo.'
+    ? (trialReady ? 'Assista à Aula 1 gratuita e conheça o conteúdo deste módulo.' : 'Conheça o conteúdo educativo preparado para este módulo.')
     : product.shortDescription;
+  const accessLabel = trialReady ? `Assistir à Aula 1 do Módulo ${module.id}` : `Acessar o Módulo ${module.id}`;
 
   return `
     <section class="card module-access module-access--${placement}" style="--module-color:${product.color};--product-color:${product.color}">
@@ -42,8 +44,8 @@ function recommendedModuleCard(module, product, placement, compact = false) {
         <div>
           <h3>${esc(product.name)}</h3>
           <p>${esc(description)}</p>
-          ${compact ? '' : '<p class="small"><strong>Aula experimental disponível.</strong></p>'}
-          <a class="btn" href="${product.trialUrl}" target="_blank" rel="noopener" data-module-access="${placement}">Acessar o Módulo ${module.id}</a>
+          ${compact || !trialReady ? '' : '<p class="small"><strong>Aula 1 gratuita disponível.</strong></p>'}
+          <a class="btn" href="${product.trialUrl}" target="_blank" rel="noopener" data-module-access="${placement}">${accessLabel}</a>
         </div>
       </div>
     </section>`;
@@ -128,7 +130,7 @@ function show() {
       <p class="small">A geração pode abrir uma prévia em alguns navegadores de celular.</p>
       <div class="actions">
         <button class="btn" id="pdf">Baixar relatório em PDF</button>
-        ${!flagDetected ? `<a class="btn secondary" href="${product.trialUrl}" target="_blank" rel="noopener" data-module-access="unlocked">Acessar o Módulo ${module.id}</a>` : ''}
+        ${!flagDetected ? `<a class="btn secondary" href="${product.trialUrl}" target="_blank" rel="noopener" data-module-access="unlocked">${product.trialUrlConfigured ? `Assistir à Aula 1 do Módulo ${module.id}` : `Acessar o Módulo ${module.id}`}</a>` : ''}
         <button class="btn secondary" id="print">Imprimir</button>
         <a class="btn ghost" href="index.html" id="restart">Refazer avaliação</a>
       </div>
