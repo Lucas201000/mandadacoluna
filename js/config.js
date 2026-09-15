@@ -115,12 +115,10 @@ export const MODULE_PRODUCTS = Object.fromEntries(Object.values(MODULES).map(m=>
   slug:['dor-inflamatoria','dor-muscular','compressao','rigidez','encurtamento','instabilidade'][m.id-1], productUrl:`vitrine.html?produto=${['dor-inflamatoria','dor-muscular','compressao','rigidez','encurtamento','instabilidade'][m.id-1]}`,
   image:`assets/images/produto-modulo-${m.id}.jpg`,
   hotmartProductId: HOTMART_PRODUCT_IDS[m.key],
-  // A degustação passa a ser a entrada pública assim que o vídeo da Aula 1
-  // estiver configurado. Até lá, preserva a entrada atual da Flowlink.
-  trialPageUrl: `${PROJECT.trialLessonUrl}?modulo=${m.key}`,
-  trialUrl: MODULE_TRIAL_LESSONS[m.key].videoUrl
-    ? `${PROJECT.trialLessonUrl}?modulo=${m.key}`
-    : (FLOWLINK_MEMBER_URLS[m.key] || PROJECT.flowlinkUrl),
+  // Endereço público e curto de cada expositor: /modulo1, /modulo2, etc.
+  // A Vercel redireciona internamente para a página certa, sem mudar a URL.
+  trialPageUrl: `/modulo${m.id}`,
+  trialUrl: `/modulo${m.id}`,
   trialUrlConfigured: Boolean(MODULE_TRIAL_LESSONS[m.key].videoUrl),
   checkoutUrl: HOTMART_CHECKOUT_URLS[m.key] || '',
   comboCheckoutUrl: HOTMART_CHECKOUT_URLS.combo || '',

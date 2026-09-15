@@ -1,4 +1,12 @@
 {
+  "rewrites": [
+    { "source": "/modulo1", "destination": "/aula-experimental.html?modulo=inflamatoria" },
+    { "source": "/modulo2", "destination": "/aula-experimental.html?modulo=muscular" },
+    { "source": "/modulo3", "destination": "/aula-experimental.html?modulo=compressao" },
+    { "source": "/modulo4", "destination": "/aula-experimental.html?modulo=rigidez" },
+    { "source": "/modulo5", "destination": "/aula-experimental.html?modulo=encurtamento" },
+    { "source": "/modulo6", "destination": "/aula-experimental.html?modulo=instabilidade" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

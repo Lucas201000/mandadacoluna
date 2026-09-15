@@ -54,7 +54,7 @@ O PDF usa jsPDF e os gráficos Chart.js por CDN. Conclua uma avaliação, preenc
 
 ### Aula experimental e continuidade
 
-Cada botão de módulo abre `aula-experimental.html?modulo=...`, uma página própria da Mandala com a Aula 1 gratuita. Edite `MODULE_TRIAL_LESSONS` em `js/config.js` e informe em `videoUrl` uma URL direta de MP4, YouTube ou Vimeo. Para não pesar o site, hospede os vídeos fora do repositório. Se usar YouTube ou Vimeo, inclua o fornecedor na Política de Privacidade antes de ativar o vídeo.
+Cada botão de módulo abre um endereço curto próprio: `/modulo1` até `/modulo6`. A Vercel envia cada endereço para a página correspondente da Aula 1. Edite `MODULE_TRIAL_LESSONS` em `js/config.js` e informe em `videoUrl` uma URL direta de MP4, YouTube ou Vimeo. Para não pesar o site, hospede os vídeos fora do repositório. Se usar YouTube ou Vimeo, inclua o fornecedor na Política de Privacidade antes de ativar o vídeo.
 
 Copie o HotLink real de cada produto em **Hotmart → Produtos → Links de divulgação** e cole-o em `HOTMART_CHECKOUT_URLS`. A CTA “Continuar para a aula 2” só aparece como link quando o HotLink correspondente estiver configurado. Após a compra, a página orienta o aluno a entrar na Flowlink usando o mesmo e-mail utilizado no checkout; a liberação automática depende da integração operacional entre Hotmart e Flowlink.
 
