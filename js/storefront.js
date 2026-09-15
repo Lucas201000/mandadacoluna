@@ -25,7 +25,7 @@ root.innerHTML = `
   <header class="hero">
     <p class="question-meta">VITRINE EDUCATIVA</p>
     <h1>${selected ? 'Recomendado para o seu resultado' : 'Conheça os módulos educativos'}</h1>
-    <p class="lead">${hasTrialReady ? 'Assista à primeira aula gratuita. Se decidir continuar, a próxima etapa abre o checkout do módulo e o conteúdo completo fica na Flowlink.' : 'Conheça os módulos educativos e escolha o conteúdo mais adequado para o seu momento.'}</p>
+    <p class="lead">${hasTrialReady ? 'Assista à primeira aula gratuita e, se decidir continuar, avance para o conteúdo completo do módulo.' : 'Conheça os módulos educativos e escolha o conteúdo mais adequado para o seu momento.'}</p>
   </header>
   <section style="margin-top:24px">
     <h2>${selected ? 'Seu módulo em destaque' : 'Todos os módulos'}</h2>
