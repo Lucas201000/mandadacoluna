@@ -27,7 +27,7 @@ Depois de apontar um domínio próprio, troque `mandaladacoluna.vercel.app` por 
 
 - As respostas do questionário podem revelar dados de saúde e ficam somente no navegador, por até 24 horas após a última atividade.
 - O usuário precisa aceitar a Política de Privacidade antes de persistir as respostas localmente.
-- Para liberar e receber o relatório, o usuário confirma a Política e dá consentimento específico para usar as respostas de saúde na geração e no envio do PDF.
+- Para liberar e receber o relatório, o usuário confirma a Política, dá consentimento específico para usar as respostas de saúde na geração e no envio do PDF e confirma que controla o e-mail informado com um código temporário.
 - WhatsApp é opcional. O Supabase recebe apenas nome, e-mail, WhatsApp se preenchido, escolha de marketing, metadados de consentimento e prazo de retenção. Respostas, pontuações, regiões e sinais de alerta não são enviados como lead.
 - O registro mínimo possui prazo operacional de 90 dias. Defina uma rotina interna para eliminar ou anonimizar registros expirados, respeitando obrigações legais e solicitações de titulares.
 
@@ -35,19 +35,20 @@ Para adaptar a tabela existente, abra **SQL Editor** no Supabase e execute [`sup
 
 ### E-mail transacional pela Brevo
 
-A função protegida `api/send-assessment-email.js` prepara o mesmo relatório gerado no navegador e o envia como anexo PDF após o lead ser salvo. O arquivo não é gravado publicamente nem salvo no Supabase: ele permanece apenas na memória do navegador até ser transmitido por HTTPS à função da Vercel e à Brevo. Na Vercel, em **Settings → Environment Variables**, configure as variáveis somente no ambiente **Production**:
+A função protegida `api/send-assessment-email.js` primeiro envia um código temporário sem relatos de saúde. Só depois da confirmação ela prepara e envia o mesmo relatório gerado no navegador como anexo PDF. O arquivo não é gravado publicamente nem salvo no Supabase: ele permanece apenas na memória do navegador até ser transmitido por HTTPS à função da Vercel e à Brevo. Na Vercel, em **Settings → Environment Variables**, configure as variáveis somente no ambiente **Production**:
 
 - `BREVO_API_KEY`: chave de API da Brevo.
 - `BREVO_SENDER_EMAIL`: remetente já verificado na Brevo.
 - `BREVO_SENDER_NAME`: nome que aparecerá no remetente, por exemplo `Mandala da Dor na Coluna`.
+- `EMAIL_VERIFICATION_SECRET` (recomendado): segredo aleatório e exclusivo para assinar os códigos de confirmação. Ele permite trocar a chave da Brevo sem invalidar o mecanismo de confirmação.
 - `PUBLIC_SITE_URL` (opcional): URL pública do site; atualmente `https://mandaladacoluna.vercel.app`.
 - `BREVO_MARKETING_LIST_ID` (opcional): ID da lista da Brevo para quem marcou a autorização de marketing.
 
-Nunca coloque `BREVO_API_KEY` no `js/config.js`, no GitHub ou em outro arquivo público. Depois de salvar as variáveis, faça um novo deploy pela Vercel ou envie um novo commit. O e-mail transacional é enviado sem criar contato de marketing; a Brevo só recebe/cria o contato na lista de marketing quando a pessoa marcar a autorização opcional. O anexo é limitado a 2,5 MB antes da codificação; se ele não puder ser anexado, a pessoa recebe a confirmação e ainda poderá baixar o PDF diretamente no site. O e-mail não contém as respostas completas do questionário, sinal de alerta nem recomendação de módulo.
+Nunca coloque `BREVO_API_KEY` ou `EMAIL_VERIFICATION_SECRET` no `js/config.js`, no GitHub ou em outro arquivo público. Depois de salvar as variáveis, faça um novo deploy pela Vercel ou envie um novo commit. O e-mail transacional é enviado sem criar contato de marketing; a Brevo só recebe/cria o contato na lista de marketing quando a pessoa marcar a autorização opcional. O anexo é limitado a 2,5 MB antes da codificação; se ele não puder ser anexado, a pessoa recebe a confirmação e ainda poderá baixar o PDF diretamente no site. O e-mail não contém as respostas completas do questionário, sinal de alerta nem recomendação de módulo.
 
 ## PDF e testes
 
-O PDF usa jsPDF e os gráficos Chart.js por CDN. Conclua uma avaliação e preencha o formulário de liberação. O site enviará uma cópia em PDF para o e-mail informado e manterá o botão **Baixar relatório em PDF** disponível. Verifique: gráficos visíveis, texto sem corte, nome com acentos, anexo recebido, link clicável do produto e o comportamento no Safari do iPhone (onde o PDF pode abrir em prévia). A triagem com qualquer sinal de alerta deve exibir prioridade profissional e ocultar a recomendação comercial principal.
+O PDF usa jsPDF e os gráficos Chart.js por CDN. Conclua uma avaliação, preencha o formulário de liberação e confirme o código enviado ao e-mail. O site manterá o botão **Baixar relatório em PDF** disponível mesmo se a entrega do e-mail falhar. Verifique: gráficos visíveis, texto sem corte, nome com acentos, código recebido, anexo recebido, link clicável do produto e o comportamento no Safari do iPhone (onde o PDF pode abrir em prévia). A triagem com qualquer sinal de alerta deve exibir prioridade profissional e ocultar a recomendação comercial principal.
 
 ## Novos módulos
 

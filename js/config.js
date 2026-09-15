@@ -3,7 +3,7 @@ export const STORAGE_KEY = 'mandalaDorAssessmentV1';
 // Dados de saúde informados no questionário permanecem somente neste navegador
 // durante um período curto, suficiente para retomar uma avaliação interrompida.
 export const LOCAL_STORAGE_TTL_MS = 24 * 60 * 60 * 1000;
-export const PRIVACY_POLICY_VERSION = '2026-09-14.1';
+export const PRIVACY_POLICY_VERSION = '2026-09-14.2';
 export const LEAD_RETENTION_DAYS = 90;
 export const PROJECT = {
   name: 'Mandala da Dor na Coluna', logo: 'M', professional: 'Lucas Gadoti Servelin', registration: 'CREFITO 275401-F',
@@ -78,7 +78,7 @@ export function trackEvent(eventName,eventData={}) { console.info('[Mandala anal
 export async function saveLead(leadData,assessmentData) {
   // O progresso temporário mantém o primeiro nome e as respostas autorizadas,
   // mas nunca e-mail, WhatsApp ou preferência de marketing no localStorage.
-  // O cadastro só é transmitido depois do consentimento específico para o relatório.
+  // O cadastro só é transmitido depois do consentimento específico e da confirmação do e-mail.
   const consent = assessmentData.consent || {};
   const consentAt = consent.reportSensitiveDataConsentAt || consent.reportPrivacyAcknowledgedAt || new Date().toISOString();
   const payload={
