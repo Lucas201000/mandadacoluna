@@ -1,7 +1,9 @@
 import { MODULE_PRODUCTS, PROJECT, trackEvent } from './config.js';
 
 const root = document.querySelector('#trial-lesson-app');
-const moduleKey = new URLSearchParams(location.search).get('modulo');
+const queryModuleKey = new URLSearchParams(location.search).get('modulo');
+const pathProduct = Object.entries(MODULE_PRODUCTS).find(([, item]) => location.pathname.replace(/\/$/, '') === `/modulo${item.moduleId}`);
+const moduleKey = queryModuleKey || pathProduct?.[0];
 const product = MODULE_PRODUCTS[moduleKey];
 const esc = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
 
