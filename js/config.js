@@ -126,11 +126,19 @@ export const MODULE_PRODUCTS = Object.fromEntries(Object.values(MODULES).map(m=>
   lesson: MODULE_TRIAL_LESSONS[m.key],
   shortDescription:m.recommendation, color:m.color
 }]));
-// Depoimentos provisórios — substitua somente por relatos reais autorizados.
+// Relatos públicos exibidos também nos intervalos do questionário.
 export const STOREFRONT_CONTENT = {
   testimonials: [
-    { quote: 'Exemplo de depoimento: a avaliação ajudou a organizar os próximos passos.', author: 'Relato ilustrativo' },
-    { quote: 'Exemplo de depoimento: consegui compreender melhor meus relatos e conversar com mais clareza com um profissional.', author: 'Relato ilustrativo' }
+    {
+      quote: 'Acho que a melhor palavra para descrever minha trajetória com o Lucas é gratidão! [...] 8 meses de dor crônica na região da lombar [...] Hoje já não sinto mais dor graças a esse profissional...',
+      author: 'Marina R. — avaliação pública no Google',
+      source: 'Google Business da Clínica Setterlin'
+    },
+    {
+      quote: 'Tive uma ótima experiência, cheguei à clínica com muita dor no quadril e saí quase sem sentir nada [...] obrigado pelo ótimo trabalho.',
+      author: 'José E. — avaliação pública no Google',
+      source: 'Google Business da Clínica Setterlin'
+    }
   ]
 };
 export function trackEvent(eventName,eventData={}) { console.info('[Mandala analytics]',eventName,eventData); /* GA4 / Meta / TikTok / API futura aqui */ }

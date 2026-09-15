@@ -6,7 +6,7 @@ function mountTestimonials() {
   const section = document.createElement('section');
   section.id = 'testimonials';
   section.className = 'card testimonials';
-  section.innerHTML = `<p class="question-meta">RELATOS</p><h2>Experiências compartilhadas</h2><p class="small">Substitua estes exemplos por depoimentos reais, autorizados e verificáveis antes de divulgar.</p><div class="testimonial-grid">${STOREFRONT_CONTENT.testimonials.map(item=>`<blockquote class="testimonial"><p>“${item.quote}”</p><footer>— ${item.author}</footer></blockquote>`).join('')}</div>`;
+  section.innerHTML = `<p class="question-meta">RELATOS</p><h2>Experiências compartilhadas</h2><p class="small">Relatos individuais publicados no Google Business da Clínica Setterlin. Resultados podem variar e não substituem avaliação profissional.</p><div class="testimonial-grid">${STOREFRONT_CONTENT.testimonials.map(item=>`<blockquote class="testimonial"><p>“${item.quote}”</p><footer>— ${item.author}<br><span class="testimonial-source">Fonte: ${item.source}</span></footer></blockquote>`).join('')}</div>`;
   footer.before(section);
   return true;
 }
