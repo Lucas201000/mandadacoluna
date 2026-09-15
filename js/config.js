@@ -41,8 +41,8 @@ export const HOTMART_PRODUCT_IDS = {
   rigidez: '8200755',
   encurtamento: '8201776',
   instabilidade: '8201801',
-  // Preencha quando o combo de 6 meses for criado e aprovado na Hotmart.
-  combo: ''
+  // Produto combo: Mandala da Dor — Acesso Completo.
+  combo: '8510985'
 };
 
 // HOTMART — cole aqui o HotLink/checkout exato copiado em
