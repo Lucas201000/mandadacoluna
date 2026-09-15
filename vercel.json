@@ -5,7 +5,13 @@
     { "source": "/modulo3", "destination": "/aula-experimental.html?modulo=compressao" },
     { "source": "/modulo4", "destination": "/aula-experimental.html?modulo=rigidez" },
     { "source": "/modulo5", "destination": "/aula-experimental.html?modulo=encurtamento" },
-    { "source": "/modulo6", "destination": "/aula-experimental.html?modulo=instabilidade" }
+    { "source": "/modulo6", "destination": "/aula-experimental.html?modulo=instabilidade" },
+    { "source": "/acesso-modulo1", "destination": "/acesso.html?modulo=inflamatoria" },
+    { "source": "/acesso-modulo2", "destination": "/acesso.html?modulo=muscular" },
+    { "source": "/acesso-modulo3", "destination": "/acesso.html?modulo=compressao" },
+    { "source": "/acesso-modulo4", "destination": "/acesso.html?modulo=rigidez" },
+    { "source": "/acesso-modulo5", "destination": "/acesso.html?modulo=encurtamento" },
+    { "source": "/acesso-modulo6", "destination": "/acesso.html?modulo=instabilidade" }
   ],
   "headers": [
     {

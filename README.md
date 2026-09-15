@@ -58,6 +58,10 @@ Cada botão de módulo abre um endereço curto próprio: `/modulo1` até `/modul
 
 Copie o HotLink real de cada produto em **Hotmart → Produtos → Links de divulgação** e cole-o em `HOTMART_CHECKOUT_URLS`. A CTA “Continuar para a aula 2” só aparece como link quando o HotLink correspondente estiver configurado. Após a compra, a página orienta o aluno a entrar na Flowlink usando o mesmo e-mail utilizado no checkout; a liberação automática depende da integração operacional entre Hotmart e Flowlink.
 
+### Operação sem integração automática
+
+Enquanto o webhook não estiver ativo, configure a página de obrigado de cada produto da Hotmart para o endereço de acesso correspondente: `/acesso-modulo1` até `/acesso-modulo6`. Exemplo: `https://mandaladacoluna.vercel.app/acesso-modulo2`. A clínica confere a venda aprovada e, em **Flowlink → Clientes → Novo Cliente**, cadastra o mesmo e-mail da Hotmart e marca apenas o módulo adquirido — ou os seis módulos no caso do combo. A Flowlink envia o e-mail de boas-vindas. Esse procedimento é manual e não confirma a liberação instantaneamente; ao crescer o volume de vendas, ative o webhook da Hotmart já disponível em **Flowlink → Integração**.
+
 ## Novos módulos
 
 Adicione primeiro o módulo em `MODULES` e o produto correspondente em `MODULE_PRODUCTS`, depois inclua a nova chave nas funções de pontuação e nas perguntas. Atualize gráficos e textos para refletir a mudança.

@@ -82,7 +82,7 @@ if (!product) {
       <p class="lead">Continue no conteúdo completo do Módulo ${product.moduleId}.</p>
       ${checkoutAction}
       ${comboAction}
-      <p class="lesson-checkout-note">Após a compra aprovada, entre na Flowlink usando o <strong>mesmo e-mail utilizado na Hotmart</strong> para acessar o conteúdo completo.</p>
+      <p class="lesson-checkout-note">Após a compra aprovada, a Clínica Setterlin libera seu módulo na Flowlink usando o <strong>mesmo e-mail utilizado na Hotmart</strong>. Você receberá um e-mail de boas-vindas para acessar o conteúdo completo.</p>
     </section>
     <section class="card lesson-access">
       <strong>Você já comprou?</strong>

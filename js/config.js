@@ -12,6 +12,7 @@ export const PROJECT = {
   // usando o mesmo e-mail usado no checkout da Hotmart.
   flowlinkUrl: 'https://clinica-setterlin.flowlink-app.online/',
   trialLessonUrl: 'aula-experimental.html',
+  accessReleaseUrl: 'acesso.html',
   privacyUrl: 'privacidade.html', termsUrl: 'termos.html', healthNoticeUrl: 'aviso-saude.html',
   healthNotice: 'Esta ferramenta possui finalidade educativa e não substitui avaliação, diagnóstico ou tratamento profissional.'
 };
@@ -119,6 +120,8 @@ export const MODULE_PRODUCTS = Object.fromEntries(Object.values(MODULES).map(m=>
   // A Vercel redireciona internamente para a página certa, sem mudar a URL.
   trialPageUrl: `/modulo${m.id}`,
   trialUrl: `/modulo${m.id}`,
+  // Use como página de obrigado/redirecionamento após a compra na Hotmart.
+  accessReleaseUrl: `/acesso-modulo${m.id}`,
   trialUrlConfigured: Boolean(MODULE_TRIAL_LESSONS[m.key].videoUrl),
   checkoutUrl: HOTMART_CHECKOUT_URLS[m.key] || '',
   comboCheckoutUrl: HOTMART_CHECKOUT_URLS.combo || '',
