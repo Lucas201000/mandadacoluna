@@ -14,10 +14,6 @@ function trialAction(product) {
   return `<a class="btn" href="${product.trialUrl}" target="_blank" rel="noopener" data-trial="${product.slug}">${label}</a>`;
 }
 
-function detailsAction(product) {
-  return `<button class="btn ghost" type="button" data-details="${product.slug}" aria-expanded="false">Como este módulo pode ajudar</button>`;
-}
-
 trackEvent('storefront_viewed', { product: selectedSlug || null });
 
 root.innerHTML = `
@@ -35,10 +31,7 @@ root.innerHTML = `
           ${product.slug === selectedSlug ? '<span class="badge">RECOMENDADO PARA O SEU RESULTADO</span>' : ''}
           <img class="module-cover" src="${product.image}" alt="Capa do ${product.name}" loading="lazy" onerror="this.classList.add('module-cover--missing');this.alt='Capa do módulo indisponível';">
           <h3 style="margin-top:16px">${product.name}</h3>
-          <p class="small">${product.shortDescription}</p>
-          ${product.trialUrlConfigured ? '<p class="small"><strong>Aula 1 gratuita disponível.</strong></p>' : ''}
-          <div class="actions">${trialAction(product)}${detailsAction(product)}</div>
-          <div class="module-details hidden" id="detalhes-${product.slug}"><p class="small">${product.shortDescription}</p><p class="small">O conteúdo foi pensado como apoio educativo e não substitui avaliação profissional.</p></div>
+          <div class="actions">${trialAction(product)}</div>
         </article>`).join('')}
     </div>
   </section>
@@ -46,7 +39,7 @@ root.innerHTML = `
     <h2>Dúvidas frequentes</h2>
     <h3>Posso conhecer antes de continuar?</h3>
     <p class="small">${hasTrialReady ? 'Sim. Cada módulo com Aula 1 liberada permite conhecer o conteúdo antes de seguir para a continuidade.' : 'Você pode conhecer os módulos e verificar qual conteúdo faz mais sentido para seu momento.'}</p>
-    <h3>Isso substitui acompanhamento profissional?</h3>
+    <h3>Isso substitui acompanhamento presencial de um profissional?</h3>
     <p class="small">Não. Todo o conteúdo tem finalidade educativa e deve ser contextualizado à sua situação por um profissional de saúde quando necessário.</p>
     <h3>Posso escolher outro módulo?</h3>
     <p class="small">Sim. Os demais módulos permanecem disponíveis para consulta.</p>
@@ -55,16 +48,6 @@ root.innerHTML = `
 
 document.querySelectorAll('[data-trial]').forEach(link => {
   link.onclick = () => trackEvent('trial_lesson_clicked', { product: link.dataset.trial });
-});
-
-document.querySelectorAll('[data-details]').forEach(button => {
-  button.onclick = () => {
-    const details = document.querySelector(`#detalhes-${button.dataset.details}`);
-    const isOpen = !details.classList.contains('hidden');
-    details.classList.toggle('hidden', isOpen);
-    button.setAttribute('aria-expanded', String(!isOpen));
-    button.textContent = isOpen ? 'Como este módulo pode ajudar' : 'Fechar detalhes';
-  };
 });
 
 if (selected) {
