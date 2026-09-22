@@ -49,13 +49,13 @@ export const HOTMART_PRODUCT_IDS = {
 // Produtos > Links de divulgação. Não monte a URL apenas com o ID interno.
 // A Aula 2 usa estes links; o site não exibe preço antes do checkout.
 export const HOTMART_CHECKOUT_URLS = {
-  inflamatoria: '',
-  muscular: '',
-  compressao: '',
-  rigidez: '',
-  encurtamento: '',
-  instabilidade: '',
-  combo: ''
+  inflamatoria: 'https://pay.hotmart.com/L106902169J',
+  muscular: 'https://pay.hotmart.com/M106902229Q',
+  compressao: 'https://pay.hotmart.com/Q106902275H',
+  rigidez: 'https://pay.hotmart.com/T106902451R',
+  encurtamento: 'https://pay.hotmart.com/M106904843E',
+  instabilidade: 'https://pay.hotmart.com/D106904885P',
+  combo: 'https://pay.hotmart.com/X107590406Y'
 };
 
 // FLOWLINK — se existir uma entrada específica para cada módulo pago, cole-a
