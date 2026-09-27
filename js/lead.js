@@ -4,6 +4,23 @@ import { saveAssessment } from './storage.js';
 // Mantém o corpo enviado à função da Vercel abaixo do limite seguro, mesmo após o Base64.
 const MAX_EMAIL_PDF_BYTES = Math.floor(2.5 * 1024 * 1024);
 
+function redirectToRecommendedCheckout(result, emailStatus) {
+  // A triagem de segurança sempre tem prioridade sobre qualquer continuidade comercial.
+  if (result.safety?.redFlagDetected) return;
+
+  const checkoutUrl = result.recommendedProduct?.checkoutUrl;
+  if (!checkoutUrl || !/^https:\/\/pay\.hotmart\.com\//i.test(checkoutUrl)) return;
+
+  emailStatus.textContent = 'Relatório encaminhado. Agora vamos levar você para a continuidade do módulo recomendado...';
+  trackEvent('recommended_checkout_redirected', {
+    module: result.primaryModule,
+    source: 'email_verification'
+  });
+
+  // Não adicionamos nome, e-mail, telefone ou resultado à URL do checkout.
+  window.setTimeout(() => window.location.assign(checkoutUrl), 650);
+}
+
 async function requestReportCode(result) {
   const response = await fetch('/api/send-assessment-email', {
     method: 'POST',
@@ -217,6 +234,8 @@ export function mountLeadForm(result, onSuccess, createAttachment) {
                   : 'Seu e-mail foi confirmado. O PDF continua disponível para baixar abaixo.';
                 trackEvent('assessment_email_sent', { attachment: issue || 'not_available' });
               }
+
+              redirectToRecommendedCheckout(result, emailStatus);
             } catch (error) {
               const reason = String(error?.message || '');
               emailStatus.textContent = reason.includes('Código') || reason.includes('tentativas')

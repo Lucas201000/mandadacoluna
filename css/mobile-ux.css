@@ -1,9 +1,10 @@
 /* Camada de UX mobile: melhora leitura, toque e estabilidade visual. */
-html { -webkit-text-size-adjust: 100%; }
-body { overflow-x: hidden; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body { overflow-x: hidden; overscroll-behavior-y: none; }
 
 @media (max-width: 650px) {
   .shell { width: min(100% - 20px, 780px); padding: 14px 0 32px; }
+  .shell { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
   .brand { min-height: 44px; margin: 2px 4px 16px; font-size: 15px; }
   .brand-mark { width: 34px; height: 34px; }
   .hero, .card { border-radius: 16px; }
@@ -22,9 +23,13 @@ body { overflow-x: hidden; }
   .actions { gap: 10px; margin-top: 20px; }
   .actions .btn, .actions .btn.ghost, .actions .btn.secondary { width: 100%; }
   .btn { min-height: 54px; padding: 15px 18px; touch-action: manipulation; }
+  .btn:active { transform:scale(.985); }
   input, select { min-height: 54px; font-size: 16px; }
+  input[type="checkbox"] { min-height: 22px; min-width: 22px; }
   input[type="range"] { min-height: 44px; accent-color: var(--brand); touch-action: manipulation; }
   .form-grid { gap: 14px; }
+  #email-verification .actions { flex-direction: column; }
+  #email-verification input { letter-spacing: .12em; text-align: center; font-weight: 700; }
   .small, .notice, .check, .error { font-size: 15px; }
   .check { line-height: 1.45; }
   .results-header { padding: 4px 2px 18px; }
@@ -44,6 +49,10 @@ body { overflow-x: hidden; }
 }
 
 @media (max-width: 390px) {
+  h1 { font-size: clamp(29px, 9.2vw, 36px); }
+  .hero, .card { padding: 20px 17px; }
+  .progress-label { gap: 8px; }
+  .progress-label span:last-child { white-space: nowrap; }
   .product { flex-direction: column; }
   .product > div:last-child { width: 100%; min-width: 0; }
   .product-art { width: 100%; height: auto; aspect-ratio: 16 / 7; }

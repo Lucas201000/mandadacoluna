@@ -102,7 +102,7 @@ function show() {
     ${!flagDetected ? `<div style="margin-top:20px">${recommendedModuleCard(module, product, 'middle')}</div>` : ''}
     <section class="card lead-box" id="lead-gate">
       <h2>Para liberar seu relatório completo para download, faça um breve cadastro.</h2>
-      <p class="small">Após a liberação, você poderá baixar o arquivo aqui. Para receber uma cópia em PDF por e-mail, confirme o endereço informado com um código de 8 números. Autorizar conteúdos e recomendações é opcional.</p>
+      <p class="small">Após a liberação, você poderá baixar o arquivo aqui. Para receber uma cópia em PDF por e-mail, confirme o endereço informado com um código de 8 números. Depois da confirmação, você seguirá para a continuidade do módulo recomendado.</p>
       <form id="lead-form">
         <div class="form-grid">
           <label class="field">Nome
