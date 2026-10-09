@@ -72,41 +72,43 @@ export const FLOWLINK_MEMBER_URLS = {
 // AULA EXPERIMENTAL — hospede a primeira aula em um provedor de vídeo e cole
 // uma URL direta .mp4, um link incorporável do YouTube ou do Vimeo.
 // Não suba vídeos grandes diretamente neste repositório/Vercel.
+const MODULE_PRESENTATION_VIDEO_URL = 'https://youtu.be/qX56sVDck_0?is=eLLtFWbVsg3-dXuB';
+
 export const MODULE_TRIAL_LESSONS = {
   inflamatoria: {
     title: 'Como começar quando a dor está mais irritada',
     focus: 'Movimentos iniciais, conforto e sinais para respeitar durante a prática.',
-    videoUrl: '',
+    videoUrl: MODULE_PRESENTATION_VIDEO_URL,
     outcomes: ['Entender o objetivo educativo do módulo', 'Começar com movimentos confortáveis', 'Saber quando pausar e procurar avaliação profissional']
   },
   muscular: {
     title: 'Primeiros passos para lidar com a tensão muscular',
     focus: 'Como observar a tensão acumulada e organizar movimentos simples no dia a dia.',
-    videoUrl: '',
+    videoUrl: MODULE_PRESENTATION_VIDEO_URL,
     outcomes: ['Reconhecer sinais comuns de tensão', 'Aprender uma rotina inicial confortável', 'Preparar o corpo para os próximos passos']
   },
   compressao: {
     title: 'Como observar sintomas que se espalham com segurança',
     focus: 'Cuidados educativos para relatos de irradiação ou sensibilidade nervosa.',
-    videoUrl: '',
+    videoUrl: MODULE_PRESENTATION_VIDEO_URL,
     outcomes: ['Entender o objetivo do módulo', 'Identificar limites de conforto', 'Reconhecer quando é importante buscar avaliação profissional']
   },
   rigidez: {
     title: 'Começando a recuperar confiança para se mover',
     focus: 'Movimentos leves e graduais para quem relata sensação de rigidez ou trava.',
-    videoUrl: '',
+    videoUrl: MODULE_PRESENTATION_VIDEO_URL,
     outcomes: ['Observar a mobilidade sem forçar', 'Entender a progressão gradual', 'Começar com um movimento educativo simples']
   },
   encurtamento: {
     title: 'Mobilidade e sensação de músculos puxando',
     focus: 'Uma introdução educativa à flexibilidade feita com progressão e conforto.',
-    videoUrl: '',
+    videoUrl: MODULE_PRESENTATION_VIDEO_URL,
     outcomes: ['Reconhecer o limite confortável', 'Evitar forçar alongamentos', 'Entender como a progressão será construída']
   },
   instabilidade: {
     title: 'Criando uma base de controle e estabilidade',
     focus: 'Princípios iniciais de respiração, controle de movimento e firmeza corporal.',
-    videoUrl: '',
+    videoUrl: MODULE_PRESENTATION_VIDEO_URL,
     outcomes: ['Entender a base do controle corporal', 'Conhecer o objetivo dos exercícios iniciais', 'Preparar-se para progredir com segurança']
   }
 };
