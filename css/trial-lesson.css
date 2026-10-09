@@ -4,7 +4,7 @@
 .lesson-count { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: var(--module-color); color: #fff; font-weight: 700; font-size: 18px; box-shadow: 0 8px 18px color-mix(in srgb, var(--module-color) 28%, transparent); }
 .lesson-cover { width: 100%; aspect-ratio: 1.2/1; object-fit: cover; border-radius: 18px; border: 1px solid var(--line); box-shadow: 0 14px 32px #123d5515; }
 .lesson-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr); gap: 20px; margin-top: 20px; }
-.lesson-video-card { padding: 16px; background: #092f43; border: 0; overflow: hidden; }
+.lesson-video-card { align-self: start; padding: 16px; background: #092f43; border: 0; overflow: hidden; }
 .lesson-video,
 .lesson-video iframe,
 .lesson-video-card > iframe { display: block; width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 12px; background: #061d2a; }
