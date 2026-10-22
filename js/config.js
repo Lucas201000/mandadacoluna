@@ -72,7 +72,7 @@ export const FLOWLINK_MEMBER_URLS = {
 // AULA EXPERIMENTAL — hospede a primeira aula em um provedor de vídeo e cole
 // uma URL direta .mp4, um link incorporável do YouTube ou do Vimeo.
 // Não suba vídeos grandes diretamente neste repositório/Vercel.
-const MODULE_PRESENTATION_VIDEO_URL = 'https://youtu.be/qX56sVDck_0?is=eLLtFWbVsg3-dXuB';
+const MODULE_PRESENTATION_VIDEO_URL = 'https://youtu.be/XzY1ya9-F0w?is=9bwxvMF1PoV4pIZs';
 
 export const MODULE_TRIAL_LESSONS = {
   inflamatoria: {
