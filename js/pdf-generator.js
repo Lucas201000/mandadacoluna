@@ -22,8 +22,8 @@ function safeName(name) {
     .toLowerCase();
 }
 
-function resolveProductUrl(product) {
-  const configuredUrl = product?.trialUrl || product?.productUrl || PROJECT.flowlinkUrl || PROJECT.storefrontUrl;
+function resolveCheckoutUrl(product) {
+  const configuredUrl = product?.checkoutUrl || '';
   if (!configuredUrl) return '';
 
   try {
@@ -144,7 +144,7 @@ async function buildAssessmentPdf(result, charts) {
   const pdf = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
   const primary = MODULES[result.primaryModule];
   const product = result.recommendedProduct || {};
-  const productUrl = resolveProductUrl(product);
+  const checkoutUrl = resolveCheckoutUrl(product);
   const productName = product.name || `Módulo ${primary.id}`;
   const productDescription = product.shortDescription || primary.recommendation;
 
@@ -239,7 +239,7 @@ async function buildAssessmentPdf(result, charts) {
     result.safety.redFlagDetected ? 'Próximo passo com prioridade' : `Conheça o Módulo ${primary.id}`,
     result.safety.redFlagDetected
       ? 'Priorize atendimento profissional antes de considerar uma recomendação comercial.'
-      : (product.trialUrlConfigured ? 'Comece pela Aula 1 gratuita do conteúdo correspondente ao perfil predominante.' : 'Conheça o conteúdo correspondente ao perfil predominante.')
+      : 'Se desejar continuar, acesse o checkout seguro do módulo correspondente ao seu resultado.'
   );
   const productCardY = Math.max(55, nextTitleBottom + 9);
   pdf.setFont('helvetica', 'bold');
@@ -261,15 +261,17 @@ async function buildAssessmentPdf(result, charts) {
   pdf.setFontSize(10);
   pdf.text(productDescriptionLines, 24, productCardY + 23 + productNameHeight, { lineHeightFactor: 1.35 });
 
-  if (!result.safety.redFlagDetected && productUrl) {
+  if (!result.safety.redFlagDetected && checkoutUrl) {
+    // O próprio card que informa o módulo também leva ao checkout.
+    pdf.link(PAGE.margin, productCardY, PAGE.contentWidth, productCardHeight, { url: checkoutUrl });
     const buttonY = productCardY + productCardHeight + 15;
     pdf.setFillColor(primary.color);
     pdf.roundedRect(PAGE.margin, buttonY, PAGE.contentWidth, 16, 4, 4, 'F');
     pdf.setTextColor(255);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(14);
-    pdf.text(product.trialUrlConfigured ? `Assistir à Aula 1 do Módulo ${primary.id}` : `Acessar o Módulo ${primary.id}`, PAGE.margin + 8, buttonY + 11);
-    pdf.link(PAGE.margin, buttonY, PAGE.contentWidth, 16, { url: productUrl });
+    pdf.text(`Comprar o Módulo ${primary.id} na Hotmart`, PAGE.margin + 8, buttonY + 11);
+    pdf.link(PAGE.margin, buttonY, PAGE.contentWidth, 16, { url: checkoutUrl });
 
     pdf.setTextColor(24, 50, 47);
     pdf.setFont('helvetica', 'normal');
@@ -277,14 +279,14 @@ async function buildAssessmentPdf(result, charts) {
     const urlY = buttonY + 27;
     const urlBottom = writeWrappedText(
       pdf,
-      `Caso o botão não abra, acesse: ${productUrl}`,
+      `Caso o botão não abra, acesse: ${checkoutUrl}`,
       PAGE.margin,
       urlY,
       { maxWidth: 175, lineHeightFactor: 1.35 }
     );
     // Mantém uma segunda área clicável que acompanha todo o endereço,
     // inclusive quando ele quebra em mais de uma linha no celular.
-    pdf.link(PAGE.margin, urlY - 5, PAGE.contentWidth, Math.max(18, urlBottom - urlY + 10), { url: productUrl });
+    pdf.link(PAGE.margin, urlY - 5, PAGE.contentWidth, Math.max(18, urlBottom - urlY + 10), { url: checkoutUrl });
   }
   addFooter(pdf);
 
