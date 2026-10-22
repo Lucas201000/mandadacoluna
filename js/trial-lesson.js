@@ -10,12 +10,20 @@ const esc = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&a
 function youtubeEmbed(url) {
   try {
     const parsed = new URL(url);
-    if (parsed.hostname.includes('youtu.be')) return `https://www.youtube-nocookie.com/embed/${parsed.pathname.slice(1)}`;
+    let id = '';
+    if (parsed.hostname.includes('youtu.be')) id = parsed.pathname.slice(1);
     if (parsed.hostname.includes('youtube.com')) {
-      const id = parsed.searchParams.get('v');
-      if (id) return `https://www.youtube-nocookie.com/embed/${id}`;
-      if (parsed.pathname.startsWith('/embed/')) return `https://www.youtube-nocookie.com${parsed.pathname}`;
+      id = parsed.searchParams.get('v') || (parsed.pathname.startsWith('/embed/') ? parsed.pathname.slice('/embed/'.length) : '');
     }
+    if (!id) return '';
+    const embed = new URL(`https://www.youtube-nocookie.com/embed/${id}`);
+    embed.searchParams.set('autoplay', '1');
+    embed.searchParams.set('mute', '1');
+    embed.searchParams.set('playsinline', '1');
+    embed.searchParams.set('enablejsapi', '1');
+    embed.searchParams.set('rel', '0');
+    embed.searchParams.set('origin', location.origin);
+    return embed.toString();
   } catch {}
   return '';
 }
@@ -35,13 +43,48 @@ function videoMarkup(lesson, productData) {
   const source = String(lesson.videoUrl || '').trim();
   const youtube = youtubeEmbed(source);
   const vimeo = vimeoEmbed(source);
-  if (youtube || vimeo) {
-    return `<iframe title="Aula experimental: ${esc(lesson.title)}" src="${youtube || vimeo}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  if (youtube) {
+    return `<div class="lesson-video-frame">
+      <iframe id="lesson-video-player" title="Aula experimental: ${esc(lesson.title)}" src="${youtube}" loading="eager" allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+      <button class="lesson-sound-button" type="button" aria-label="Ativar o som e reiniciar o vídeo">Ativar som</button>
+    </div>`;
+  }
+  if (vimeo) {
+    return `<iframe title="Aula experimental: ${esc(lesson.title)}" src="${vimeo}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
   }
   if (source) {
     return `<video class="lesson-video" controls playsinline preload="metadata" poster="${esc(productData.image)}"><source src="${esc(source)}">Seu navegador não suporta este vídeo.</video>`;
   }
   return `<div class="lesson-placeholder"><div><div class="lesson-play" aria-hidden="true">▶</div><h2>Aula experimental</h2><p>O vídeo desta aula será inserido aqui. A estrutura já está pronta para receber um link do YouTube, Vimeo ou um vídeo MP4 hospedado.</p></div></div>`;
+}
+
+function setupMutedAutoplay() {
+  const iframe = root.querySelector('#lesson-video-player');
+  const soundButton = root.querySelector('.lesson-sound-button');
+  if (!iframe || !soundButton) return;
+
+  let restartedWithSound = false;
+  const sendCommand = (func, args = []) => {
+    iframe.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), 'https://www.youtube-nocookie.com');
+  };
+  const restartWithSound = () => {
+    if (restartedWithSound) return;
+    restartedWithSound = true;
+    sendCommand('seekTo', [0, true]);
+    sendCommand('unMute');
+    sendCommand('playVideo');
+    soundButton.hidden = true;
+    soundButton.setAttribute('aria-hidden', 'true');
+  };
+
+  soundButton.addEventListener('click', restartWithSound);
+  window.addEventListener('message', event => {
+    if (event.origin !== 'https://www.youtube-nocookie.com' && event.origin !== 'https://www.youtube.com') return;
+    try {
+      const message = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+      if (message?.event === 'onVolumeChange' && message?.info?.muted === false) restartWithSound();
+    } catch {}
+  });
 }
 
 if (!product) {
@@ -101,4 +144,5 @@ if (!product) {
   document.querySelector('#checkout-combo')?.addEventListener('click', () => trackEvent('product_checkout_clicked', { module: 'combo', source: 'trial_lesson' }));
   document.querySelector('#flowlink-access')?.addEventListener('click', () => trackEvent('flowlink_member_access_clicked', { module: moduleKey }));
   root.querySelector('video')?.addEventListener('play', () => trackEvent('trial_lesson_started', { module: moduleKey }));
+  setupMutedAutoplay();
 }
