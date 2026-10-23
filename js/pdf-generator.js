@@ -239,7 +239,7 @@ async function buildAssessmentPdf(result, charts) {
     result.safety.redFlagDetected ? 'Próximo passo com prioridade' : `Conheça o Módulo ${primary.id}`,
     result.safety.redFlagDetected
       ? 'Priorize atendimento profissional antes de considerar uma recomendação comercial.'
-      : 'Se desejar continuar, acesse o checkout seguro do módulo correspondente ao seu resultado.'
+      : 'Acesse o conteúdo correspondente ao seu resultado pelo botão abaixo.'
   );
   const productCardY = Math.max(55, nextTitleBottom + 9);
   pdf.setFont('helvetica', 'bold');
@@ -270,7 +270,7 @@ async function buildAssessmentPdf(result, charts) {
     pdf.setTextColor(255);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(14);
-    pdf.text(`Comprar o Módulo ${primary.id} na Hotmart`, PAGE.margin + 8, buttonY + 11);
+    pdf.text(`Acessar o Módulo ${primary.id}`, PAGE.margin + 8, buttonY + 11);
     pdf.link(PAGE.margin, buttonY, PAGE.contentWidth, 16, { url: checkoutUrl });
 
     pdf.setTextColor(24, 50, 47);
