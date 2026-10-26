@@ -28,26 +28,64 @@ if (!result || !result.answers) {
   show();
 }
 
-function recommendedModuleCard(module, product, placement, compact = false) {
-  const trialReady = product.trialUrlConfigured;
-  const description = compact
-    ? (trialReady ? 'Assista à apresentação gratuita e conheça o caminho deste módulo.' : 'Conheça o conteúdo educativo preparado para este módulo.')
-    : product.shortDescription;
-  const accessLabel = trialReady ? `Ver a apresentação do Módulo ${module.id}` : `Acessar o Módulo ${module.id}`;
+function youtubeEmbed(url) {
+  try {
+    const parsed = new URL(url);
+    const id = parsed.hostname.includes('youtu.be')
+      ? parsed.pathname.slice(1)
+      : parsed.hostname.includes('youtube.com')
+        ? parsed.searchParams.get('v') || (parsed.pathname.startsWith('/embed/') ? parsed.pathname.slice('/embed/'.length) : '')
+        : '';
+    if (!id) return '';
 
+    const embed = new URL(`https://www.youtube-nocookie.com/embed/${id}`);
+    embed.searchParams.set('autoplay', '1');
+    embed.searchParams.set('mute', '1');
+    embed.searchParams.set('playsinline', '1');
+    embed.searchParams.set('enablejsapi', '1');
+    embed.searchParams.set('rel', '0');
+    embed.searchParams.set('cc_load_policy', '0');
+    embed.searchParams.set('iv_load_policy', '3');
+    embed.searchParams.set('hl', 'pt-BR');
+    embed.searchParams.set('origin', location.origin);
+    return embed.toString();
+  } catch {
+    return '';
+  }
+}
+
+function resultVideo(product) {
+  const embed = youtubeEmbed(product.lesson?.videoUrl || '');
+  if (!embed) return '';
   return `
-    <section class="card module-access module-access--${placement}" style="--module-color:${product.color};--product-color:${product.color}">
-      <p class="question-meta">${placement === 'top' ? 'SEU PRÓXIMO PASSO EDUCATIVO' : 'MÓDULO RECOMENDADO'}</p>
-      <div class="product">
-        <div class="product-art" aria-hidden="true">${module.id}</div>
-        <div>
-          <h3>${esc(product.name)}</h3>
-          <p>${esc(description)}</p>
-          ${compact || !trialReady ? '' : '<p class="small"><strong>Apresentação gratuita disponível.</strong></p>'}
-          <a class="btn" href="${product.trialUrl}" target="_blank" rel="noopener" data-module-access="${placement}">${accessLabel}</a>
-        </div>
+    <section class="result-presentation" aria-label="Apresentação do módulo recomendado">
+      <div class="result-video-frame">
+        <iframe id="result-video-player" title="Apresentação do ${esc(product.name)}" src="${embed}" loading="eager" allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        <button class="result-sound-button" type="button" aria-label="Ativar o som e reiniciar o vídeo">Ativar som</button>
       </div>
     </section>`;
+}
+
+function setupResultVideo() {
+  const iframe = root.querySelector('#result-video-player');
+  const soundButton = root.querySelector('.result-sound-button');
+  if (!iframe || !soundButton) return;
+
+  let restartedWithSound = false;
+  const command = (func, args = []) => iframe.contentWindow?.postMessage(
+    JSON.stringify({ event: 'command', func, args }),
+    'https://www.youtube-nocookie.com'
+  );
+  const restartWithSound = () => {
+    if (restartedWithSound) return;
+    restartedWithSound = true;
+    command('seekTo', [0, true]);
+    command('unMute');
+    command('playVideo');
+    soundButton.hidden = true;
+  };
+
+  soundButton.addEventListener('click', restartWithSound);
 }
 
 function show() {
@@ -67,7 +105,14 @@ function show() {
         <strong>Suas respostas incluem sinais que merecem avaliação profissional.</strong><br>
         Isso não significa necessariamente que exista algo grave, mas esse tipo de sintoma não deve ser analisado somente por um questionário online. Procure atendimento profissional.
       </section>` : ''}
-    ${!flagDetected ? `<div class="result-focus">${recommendedModuleCard(module, product, 'top', true)}</div>` : ''}
+    ${!flagDetected ? `
+      <section class="card result-next-step" style="--module-color:${esc(product.color)}">
+        <p class="question-meta">SEU PRÓXIMO PASSO</p>
+        <h2>${esc(product.name)}</h2>
+        ${resultVideo(product)}
+        <p class="lead">Você já identificou por onde começar. Agora é sua escolha dar esse passo.</p>
+        <a class="btn result-checkout" href="${esc(product.checkoutUrl)}" target="_blank" rel="noopener" id="result-checkout">QUERO COMEÇAR AGORA</a>
+      </section>` : ''}
     <section class="card report-actions" id="report-actions" style="margin-top:20px">
       <p class="small">Quer guardar este resultado?</p>
       <div class="actions">
@@ -84,11 +129,10 @@ function show() {
   const charts = renderCharts(result);
   trackEvent('result_viewed');
 
-  document.querySelectorAll('[data-module-access]').forEach(link => {
-    link.onclick = () => {
-      trackEvent('trial_lesson_clicked', { module: result.primaryModule, placement: link.dataset.moduleAccess });
-    };
+  document.querySelector('#result-checkout')?.addEventListener('click', () => {
+    trackEvent('product_checkout_clicked', { module: result.primaryModule, source: 'quiz_result' });
   });
+  setupResultVideo();
 
   document.querySelector('#pdf').onclick = async event => {
     event.currentTarget.disabled = true;
