@@ -94,18 +94,12 @@ if (!product) {
   const checkoutAction = product.checkoutUrl
     ? `<a class="btn" href="${esc(product.checkoutUrl)}" target="_blank" rel="noopener" id="checkout-module">Acessar o conteúdo completo</a>`
     : `<div class="lesson-next-disabled"><strong>Próxima etapa em configuração.</strong><br>Assim que ela estiver liberada, este botão levará diretamente para a Aula 2.</div>`;
-  const comboAction = product.comboCheckoutUrl
-    ? `<a class="btn ghost" href="${esc(product.comboCheckoutUrl)}" target="_blank" rel="noopener" id="checkout-combo">Quero os 6 módulos</a>`
-    : '';
-
   root.innerHTML = `
     <a class="brand" href="vitrine.html?produto=${esc(product.slug)}"><span class="brand-mark">M</span>${PROJECT.name}</a>
     <section class="hero lesson-hero" style="--module-color:${esc(product.color)}">
       <div>
         <p class="lesson-eyebrow"><span class="lesson-count">${product.moduleId}</span> APRESENTAÇÃO GRATUITA</p>
         <h1>${esc(product.name)}</h1>
-        <p class="lead">${esc(lesson.title)}</p>
-        <p class="small">${esc(lesson.focus)}</p>
       </div>
       <img class="lesson-cover" src="${esc(product.image)}" alt="Capa do ${esc(product.name)}" onerror="this.style.display='none'">
     </section>
@@ -113,36 +107,16 @@ if (!product) {
       <section class="card lesson-video-card">
         ${videoMarkup(lesson, product)}
       </section>
-      <aside class="card">
-        <p class="question-meta">NESTA AULA VOCÊ VAI</p>
-        <h2>Começar pelo essencial</h2>
-        <ul class="lesson-list">${lesson.outcomes.map(item => `<li>${esc(item)}</li>`).join('')}</ul>
-      </aside>
     </div>
     <section class="card lesson-locked" style="--module-color:${esc(product.color)};margin-top:20px">
       <p class="lesson-lock-label">🔒 PRÓXIMAS ETAPAS</p>
       <h2>Quer continuar neste módulo?</h2>
-      <p class="lead">Continue no conteúdo completo do Módulo ${product.moduleId}.</p>
       ${checkoutAction}
-      ${comboAction}
-      <p class="lesson-checkout-note">Após a compra aprovada, a Clínica Setterlin libera seu módulo na Flowlink usando o <strong>mesmo e-mail utilizado na Hotmart</strong>. Você receberá um e-mail de boas-vindas para acessar o conteúdo completo.</p>
-    </section>
-    <section class="card lesson-access">
-      <strong>Você já comprou?</strong>
-      <p class="small">Entre na Flowlink com o mesmo e-mail usado na compra. Se o acesso ainda não aparecer, fale com a Clínica Setterlin para conferirmos sua liberação.</p>
-      <a class="btn secondary" href="${esc(product.flowlinkUrl)}" target="_blank" rel="noopener" id="flowlink-access">Entrar na Flowlink</a>
-    </section>
-    <section class="card lesson-back">
-      <h2>Importante</h2>
-      <p class="small">Este conteúdo possui finalidade educativa e não substitui avaliação, diagnóstico ou tratamento profissional. Se houver piora importante ou sinais de alerta, priorize atendimento profissional.</p>
-      <a class="btn ghost" href="vitrine.html?produto=${esc(product.slug)}">Voltar para os módulos</a>
     </section>
     <footer class="footer"><a href="${PROJECT.privacyUrl}">Privacidade</a> · <a href="${PROJECT.termsUrl}">Termos</a> · <a href="${PROJECT.healthNoticeUrl}">Aviso de saúde</a></footer>`;
 
   trackEvent('trial_lesson_viewed', { module: moduleKey });
   document.querySelector('#checkout-module')?.addEventListener('click', () => trackEvent('product_checkout_clicked', { module: moduleKey, source: 'trial_lesson' }));
-  document.querySelector('#checkout-combo')?.addEventListener('click', () => trackEvent('product_checkout_clicked', { module: 'combo', source: 'trial_lesson' }));
-  document.querySelector('#flowlink-access')?.addEventListener('click', () => trackEvent('flowlink_member_access_clicked', { module: moduleKey }));
   root.querySelector('video')?.addEventListener('play', () => trackEvent('trial_lesson_started', { module: moduleKey }));
   setupMutedAutoplay();
 }

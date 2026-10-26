@@ -8,7 +8,7 @@ const hasTrialReady = products.some(product => product.trialUrlConfigured);
 
 function trialAction(product) {
   const label = product.trialUrlConfigured
-    ? `Assistir à Aula 1 do Módulo ${product.moduleId}`
+    ? `Ver a apresentação do Módulo ${product.moduleId}`
     : `Acessar o Módulo ${product.moduleId}`;
 
   return `<a class="btn" href="${product.trialUrl}" target="_blank" rel="noopener" data-trial="${product.slug}">${label}</a>`;
@@ -21,7 +21,7 @@ root.innerHTML = `
   <header class="hero">
     <p class="question-meta">VITRINE EDUCATIVA</p>
     <h1>${selected ? 'Recomendado para o seu resultado' : 'Conheça os módulos educativos'}</h1>
-    <p class="lead">${hasTrialReady ? 'Assista à primeira aula gratuita e, se decidir continuar, avance para o conteúdo completo do módulo.' : 'Conheça os módulos educativos e escolha o conteúdo mais adequado para o seu momento.'}</p>
+    <p class="lead">${hasTrialReady ? 'Escolha um módulo para ver a apresentação.' : 'Escolha o conteúdo mais adequado para o seu momento.'}</p>
   </header>
   <section style="margin-top:24px">
     <h2>${selected ? 'Seu módulo em destaque' : 'Todos os módulos'}</h2>
@@ -34,15 +34,6 @@ root.innerHTML = `
           <div class="actions">${trialAction(product)}</div>
         </article>`).join('')}
     </div>
-  </section>
-  <section class="card" style="margin-top:24px">
-    <h2>Dúvidas frequentes</h2>
-    <h3>Posso conhecer antes de continuar?</h3>
-    <p class="small">${hasTrialReady ? 'Sim. Cada módulo com Aula 1 liberada permite conhecer o conteúdo antes de seguir para a continuidade.' : 'Você pode conhecer os módulos e verificar qual conteúdo faz mais sentido para seu momento.'}</p>
-    <h3>Isso substitui acompanhamento presencial de um profissional?</h3>
-    <p class="small">Não. Todo o conteúdo tem finalidade educativa e deve ser contextualizado à sua situação por um profissional de saúde quando necessário.</p>
-    <h3>Posso escolher outro módulo?</h3>
-    <p class="small">Sim. Os demais módulos permanecem disponíveis para consulta.</p>
   </section>
   <footer class="footer"><a href="${PROJECT.privacyUrl}">Política de privacidade</a> · <a href="${PROJECT.termsUrl}">Termos de uso</a></footer>`;
 

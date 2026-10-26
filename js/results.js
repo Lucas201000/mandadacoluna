@@ -43,7 +43,7 @@ function recommendedModuleCard(module, product, placement, compact = false) {
         <div>
           <h3>${esc(product.name)}</h3>
           <p>${esc(description)}</p>
-          ${compact || !trialReady ? '' : '<p class="small"><strong>Aula 1 gratuita disponível.</strong></p>'}
+          ${compact || !trialReady ? '' : '<p class="small"><strong>Apresentação gratuita disponível.</strong></p>'}
           <a class="btn" href="${product.trialUrl}" target="_blank" rel="noopener" data-module-access="${placement}">${accessLabel}</a>
         </div>
       </div>
@@ -54,46 +54,24 @@ function show() {
   const module = MODULES[result.primaryModule];
   const product = result.recommendedProduct;
   const flagDetected = result.safety.redFlagDetected;
-  const safeName = esc(result.user.firstName || 'Você');
-  const safeRegions = esc(result.pain.additionalRegions.join(', '));
 
   root.innerHTML = `
     <a class="brand" href="index.html"><span class="brand-mark">M</span>${PROJECT.name}</a>
     <header class="results-header">
-      <p class="question-meta">RESULTADO EDUCATIVO</p>
-      <h1>Seu resultado na Mandala da Dor</h1>
-      <p class="lead">${safeName}, suas respostas apresentam maior compatibilidade com o Módulo ${module.id}: ${module.name}.</p>
+      <p class="question-meta">SEU RESULTADO</p>
+      <h1>Seu ponto de partida é o Módulo ${module.id}</h1>
+      <p class="lead">${esc(module.name)}</p>
     </header>
     ${flagDetected ? `
       <section class="notice alert">
         <strong>Suas respostas incluem sinais que merecem avaliação profissional.</strong><br>
         Isso não significa necessariamente que exista algo grave, mas esse tipo de sintoma não deve ser analisado somente por um questionário online. Procure atendimento profissional.
       </section>` : ''}
-    <div class="results-grid ${!flagDetected ? 'has-recommendation' : ''}" style="margin-top:20px">
-      <section class="card primary result-primary" style="--module-color:${module.color}">
-        <p class="question-meta">PERFIL PREDOMINANTE</p>
-        <h2>Módulo ${module.id} — ${module.name}</h2>
-        <div class="metric">${result.percentages[module.key]}%</div>
-        <p class="small">de compatibilidade relatada</p>
-        <p>${module.description}</p>
-        <p class="notice">${PROJECT.healthNotice}</p>
-      </section>
-      <section class="card result-summary">
-        <h3>Resumo dos relatos</h3>
-        <ul class="detail-list">
-          <li>Intensidade informada: ${result.pain.intensity}/10</li>
-          <li>Regiões: ${safeRegions}</li>
-          <li>Duração: ${result.pain.duration}</li>
-          <li>Secundários: ${result.secondaryModules.map(key => MODULES[key].short).join(' e ')}</li>
-        </ul>
-      </section>
-      ${!flagDetected ? recommendedModuleCard(module, product, 'top', true) : ''}
-    </div>
+    ${!flagDetected ? `<div class="result-focus">${recommendedModuleCard(module, product, 'top', true)}</div>` : ''}
     <section class="card report-actions" id="report-actions" style="margin-top:20px">
-      <h2>Seu relatório está pronto</h2>
-      <p class="small">Se quiser guardar seu resultado, baixe o PDF neste aparelho. Não é necessário preencher dados, receber código ou sair desta página.</p>
+      <p class="small">Quer guardar este resultado?</p>
       <div class="actions">
-        <button class="btn" id="pdf">Baixar relatório em PDF</button>
+        <button class="btn ghost" id="pdf">Baixar relatório em PDF</button>
         <a class="btn ghost" href="index.html" id="restart">Refazer avaliação</a>
       </div>
     </section>

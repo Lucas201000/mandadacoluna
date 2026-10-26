@@ -80,15 +80,9 @@ function home(resetViewport = true) {
     <section class="hero">
       <p class="question-meta">AVALIAÇÃO EDUCATIVA GRATUITA</p>
       <h1>Sua dor na coluna está atrapalhando sua rotina? Entenda melhor seus sinais.</h1>
-      <p class="lead">Em poucos minutos, responda perguntas simples e receba um resultado educativo com orientações iniciais.</p>
-      <ul class="benefits">
-        <li>Entenda melhor o comportamento da sua dor.</li>
-        <li>Descubra qual módulo da mandala mais combina com seus sintomas.</li>
-        <li>Baixe um relatório personalizado em PDF.</li>
-      </ul>
+      <p class="lead">Responda algumas perguntas e descubra por onde começar.</p>
       ${button('Começar minha avaliação', 'btn', 'id="start"')}
       <p class="notice"><a href="${PROJECT.healthNoticeUrl}" target="_blank" rel="noopener">${PROJECT.healthNotice}</a></p>
-      <p class="small">Para sua privacidade, as respostas ficam em rascunho temporário neste navegador e expiram após até 24 horas de inatividade. Evite usar um aparelho compartilhado.</p>
     </section>
   `, resetViewport);
 
@@ -110,7 +104,7 @@ function basic(resetViewport = true) {
     <section class="card">
       <p class="question-meta">ETAPA 1 DE 4</p>
       <h2>Vamos começar pelo básico</h2>
-      <p class="lead">Use apenas seu primeiro nome. Você poderá incluir contato antes de liberar o relatório.</p>
+      <p class="lead">Preencha só o necessário para começar.</p>
       <form id="basic-form">
         <div class="form-grid">
           <label class="field">Primeiro nome
@@ -176,11 +170,10 @@ function region(resetViewport = true) {
     <section class="card">
       <p class="question-meta">ETAPA 2 DE 4</p>
       <h2>Onde você sente mais desconforto?</h2>
-      <p class="lead">Escolha primeiro a região que mais incomoda. Se sentir em outros lugares, você pode marcar mais opções.</p>
+      <p class="lead">Marque as regiões que incomodam você.</p>
       <div class="region-grid" id="regions">
         ${regions.map(regionName => `<button class="option ${state.pain.additionalRegions.includes(regionName) ? 'selected' : ''}" data-region="${regionName}" aria-pressed="${state.pain.additionalRegions.includes(regionName)}">${regionName}</button>`).join('')}
       </div>
-      <p class="small" aria-live="polite">${state.pain.mainRegion ? `Região principal selecionada: <strong>${esc(state.pain.mainRegion)}</strong>` : 'Nenhuma região selecionada ainda.'}</p>
       <h3 style="margin-top:28px">A sensação fica no mesmo lugar ou se espalha?</h3>
       <div class="option-grid" id="radiation">
         ${[
