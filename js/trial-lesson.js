@@ -22,6 +22,9 @@ function youtubeEmbed(url) {
     embed.searchParams.set('playsinline', '1');
     embed.searchParams.set('enablejsapi', '1');
     embed.searchParams.set('rel', '0');
+    embed.searchParams.set('cc_load_policy', '0');
+    embed.searchParams.set('iv_load_policy', '3');
+    embed.searchParams.set('hl', 'pt-BR');
     embed.searchParams.set('origin', location.origin);
     return embed.toString();
   } catch {}
@@ -91,19 +94,21 @@ if (!product) {
   root.innerHTML = `<a class="brand" href="index.html"><span class="brand-mark">M</span>${PROJECT.name}</a><section class="card"><h1>Módulo não encontrado</h1><p class="lead">Escolha um módulo na vitrine ou faça a avaliação para receber uma indicação educativa.</p><a class="btn" href="vitrine.html">Ver módulos</a></section>`;
 } else {
   const lesson = product.lesson;
+  const moduleTitle = product.name.replace(/^Módulo\s+\d+\s*[—-]\s*/i, '');
   const checkoutAction = product.checkoutUrl
     ? `<a class="btn" href="${esc(product.checkoutUrl)}" target="_blank" rel="noopener" id="checkout-module">Acessar o conteúdo completo</a>`
     : `<div class="lesson-next-disabled"><strong>Próxima etapa em configuração.</strong><br>Assim que ela estiver liberada, este botão levará diretamente para a Aula 2.</div>`;
   root.innerHTML = `
     <a class="brand" href="vitrine.html?produto=${esc(product.slug)}"><span class="brand-mark">M</span>${PROJECT.name}</a>
     <section class="hero lesson-hero" style="--module-color:${esc(product.color)}">
-      <div class="lesson-presentation-main">
-        <h1>${esc(product.name)}</h1>
-        <section class="lesson-video-card">
-          ${videoMarkup(lesson, product)}
-        </section>
+      <div class="lesson-title">
+        <span>Módulo ${product.moduleId}</span>
+        <strong>${esc(moduleTitle)}</strong>
       </div>
       <img class="lesson-cover" src="${esc(product.image)}" alt="Capa do ${esc(product.name)}" onerror="this.style.display='none'">
+    </section>
+    <section class="lesson-video-card lesson-video-wide">
+      ${videoMarkup(lesson, product)}
     </section>
     <section class="card lesson-locked" style="--module-color:${esc(product.color)};margin-top:20px">
       <p class="lesson-lock-label">🔒 PRÓXIMAS ETAPAS</p>
