@@ -92,7 +92,7 @@ if (!product) {
 } else {
   const lesson = product.lesson;
   const checkoutAction = product.checkoutUrl
-    ? `<a class="btn" href="${esc(product.checkoutUrl)}" target="_blank" rel="noopener" id="checkout-module">Continuar para a aula 2</a>`
+    ? `<a class="btn" href="${esc(product.checkoutUrl)}" target="_blank" rel="noopener" id="checkout-module">Acessar o conteúdo completo</a>`
     : `<div class="lesson-next-disabled"><strong>Próxima etapa em configuração.</strong><br>Assim que ela estiver liberada, este botão levará diretamente para a Aula 2.</div>`;
   const comboAction = product.comboCheckoutUrl
     ? `<a class="btn ghost" href="${esc(product.comboCheckoutUrl)}" target="_blank" rel="noopener" id="checkout-combo">Quero os 6 módulos</a>`
@@ -102,7 +102,7 @@ if (!product) {
     <a class="brand" href="vitrine.html?produto=${esc(product.slug)}"><span class="brand-mark">M</span>${PROJECT.name}</a>
     <section class="hero lesson-hero" style="--module-color:${esc(product.color)}">
       <div>
-        <p class="lesson-eyebrow"><span class="lesson-count">${product.moduleId}</span> AULA EXPERIMENTAL GRATUITA</p>
+        <p class="lesson-eyebrow"><span class="lesson-count">${product.moduleId}</span> APRESENTAÇÃO GRATUITA</p>
         <h1>${esc(product.name)}</h1>
         <p class="lead">${esc(lesson.title)}</p>
         <p class="small">${esc(lesson.focus)}</p>
@@ -120,8 +120,8 @@ if (!product) {
       </aside>
     </div>
     <section class="card lesson-locked" style="--module-color:${esc(product.color)};margin-top:20px">
-      <p class="lesson-lock-label">🔒 AULA 2 E PRÓXIMAS ETAPAS</p>
-      <h2>Gostou da primeira aula?</h2>
+      <p class="lesson-lock-label">🔒 PRÓXIMAS ETAPAS</p>
+      <h2>Quer continuar neste módulo?</h2>
       <p class="lead">Continue no conteúdo completo do Módulo ${product.moduleId}.</p>
       ${checkoutAction}
       ${comboAction}

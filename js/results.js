@@ -31,9 +31,9 @@ if (!result || !result.answers) {
 function recommendedModuleCard(module, product, placement, compact = false) {
   const trialReady = product.trialUrlConfigured;
   const description = compact
-    ? (trialReady ? 'Assista à Aula 1 gratuita e conheça o conteúdo deste módulo.' : 'Conheça o conteúdo educativo preparado para este módulo.')
+    ? (trialReady ? 'Assista à apresentação gratuita e conheça o caminho deste módulo.' : 'Conheça o conteúdo educativo preparado para este módulo.')
     : product.shortDescription;
-  const accessLabel = trialReady ? `Assistir à Aula 1 do Módulo ${module.id}` : `Acessar o Módulo ${module.id}`;
+  const accessLabel = trialReady ? `Ver a apresentação do Módulo ${module.id}` : `Acessar o Módulo ${module.id}`;
 
   return `
     <section class="card module-access module-access--${placement}" style="--module-color:${product.color};--product-color:${product.color}">
