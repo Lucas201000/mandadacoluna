@@ -1,8 +1,7 @@
 import { PROJECT, MODULES, trackEvent } from './config.js';
 import { calculateResult } from './scoring.js';
 import { renderCharts } from './charts.js';
-import { mountLeadForm } from './lead.js';
-import { createPdfAttachment, generatePdf } from './pdf-generator.js';
+import { generatePdf } from './pdf-generator.js';
 import { clearAssessment, loadAssessment, saveAssessment } from './storage.js';
 
 const root = document.querySelector('#result-app');
@@ -90,51 +89,18 @@ function show() {
       </section>
       ${!flagDetected ? recommendedModuleCard(module, product, 'top', true) : ''}
     </div>
-    <section class="card" style="margin-top:20px">
-      <h2>Compatibilidade com os módulos</h2>
-      <p class="small">As porcentagens representam o quanto suas respostas se aproximam dos padrões educativos da Mandala. Elas não representam probabilidade de doença ou diagnóstico.</p>
-      <div class="chart-wrap"><canvas id="module-chart" aria-label="Gráfico de barras dos seis módulos"></canvas></div>
-    </section>
-    <section class="card" style="margin-top:20px">
-      <h2>Principais perfis</h2>
-      <div class="chart-wrap"><canvas id="profile-chart" aria-label="Gráfico de distribuição dos principais perfis"></canvas></div>
-    </section>
-    ${!flagDetected ? `<div style="margin-top:20px">${recommendedModuleCard(module, product, 'middle')}</div>` : ''}
-    <section class="card lead-box" id="lead-gate">
-      <h2>Para liberar seu relatório completo para download, faça um breve cadastro.</h2>
-      <p class="small">Após a liberação, você poderá baixar o arquivo aqui. Para receber uma cópia em PDF por e-mail, confirme o endereço informado com um código de 8 números. Depois da confirmação, você seguirá para a continuidade do módulo recomendado.</p>
-      <form id="lead-form">
-        <div class="form-grid">
-          <label class="field">Nome
-            <input required maxlength="60" name="name" value="${esc(result.user.firstName || '')}" autocomplete="given-name">
-          </label>
-          <label class="field">E-mail
-            <input required type="email" name="email" autocomplete="email" inputmode="email">
-          </label>
-          <label class="field">Confirme seu e-mail
-            <input required type="email" name="email-confirm" autocomplete="email" inputmode="email">
-          </label>
-          <label class="field full">WhatsApp
-            <input type="tel" name="whatsapp" inputmode="tel" autocomplete="tel" minlength="8" placeholder="Opcional · (00) 00000-0000">
-          </label>
-          <label class="check full"><input type="checkbox" name="privacy" required>Li a <a href="${PROJECT.privacyUrl}" target="_blank" rel="noopener">Política de Privacidade</a> e estou ciente de como meus dados serão tratados.</label>
-          <label class="check full"><input type="checkbox" name="sensitive-data" required>Autorizo o tratamento das respostas de saúde para gerar meu relatório educativo, registrar o pedido mínimo e enviar uma cópia em PDF ao e-mail informado.</label>
-          <label class="check full"><input type="checkbox" name="marketing">Autorizo receber conteúdos e recomendações (opcional).</label>
-        </div>
-        <p class="small">Confira o e-mail com atenção: o PDF pode incluir informações pessoais sobre seus relatos de saúde.</p>
-        <div class="actions"><button class="btn" type="submit">Liberar relatório completo</button></div>
-      </form>
-    </section>
-    <section class="card hidden" id="report-actions" style="margin-top:20px" tabindex="-1">
-      <h2>Seu relatório está liberado</h2>
-      <p class="small">A geração pode abrir uma prévia em alguns navegadores de celular.</p>
+    <section class="card report-actions" id="report-actions" style="margin-top:20px">
+      <h2>Seu relatório está pronto</h2>
+      <p class="small">Se quiser guardar seu resultado, baixe o PDF neste aparelho. Não é necessário preencher dados, receber código ou sair desta página.</p>
       <div class="actions">
         <button class="btn" id="pdf">Baixar relatório em PDF</button>
-        ${!flagDetected ? `<a class="btn secondary" href="${product.trialUrl}" target="_blank" rel="noopener" data-module-access="unlocked">${product.trialUrlConfigured ? `Assistir à Aula 1 do Módulo ${module.id}` : `Acessar o Módulo ${module.id}`}</a>` : ''}
-        <button class="btn secondary" id="print">Imprimir</button>
         <a class="btn ghost" href="index.html" id="restart">Refazer avaliação</a>
       </div>
     </section>
+    <div class="pdf-chart-source" aria-hidden="true">
+      <div class="chart-wrap"><canvas id="module-chart"></canvas></div>
+      <div class="chart-wrap"><canvas id="profile-chart"></canvas></div>
+    </div>
     <footer class="footer"><a href="${PROJECT.privacyUrl}">Privacidade</a> · <a href="${PROJECT.termsUrl}">Termos</a> · <a href="${PROJECT.healthNoticeUrl}">Aviso de saúde</a></footer>`;
 
   const charts = renderCharts(result);
@@ -145,20 +111,6 @@ function show() {
       trackEvent('trial_lesson_clicked', { module: result.primaryModule, placement: link.dataset.moduleAccess });
     };
   });
-
-  mountLeadForm(
-    result,
-    () => {
-      const reportActions = document.querySelector('#report-actions');
-      reportActions.classList.remove('hidden');
-      try {
-        reportActions.focus({ preventScroll: true });
-      } catch {
-        reportActions.focus();
-      }
-    },
-    () => createPdfAttachment(result, charts)
-  );
 
   document.querySelector('#pdf').onclick = async event => {
     event.currentTarget.disabled = true;
@@ -175,7 +127,6 @@ function show() {
     }
   };
 
-  document.querySelector('#print').onclick = () => window.print();
   document.querySelector('#restart').onclick = () => {
     clearAssessment();
     trackEvent('assessment_restarted');
