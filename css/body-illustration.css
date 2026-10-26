@@ -1,1 +1,2 @@
-.body-illustration{margin:12px auto 22px;text-align:center;color:#60716f;font-size:13px}.body-illustration svg{display:block;width:140px;height:164px;margin:auto}
+.body-illustration{margin:16px auto 22px}.body-illustration img{display:block;width:min(100%,640px);aspect-ratio:16/7;object-fit:cover;object-position:center 42%;margin:auto;border-radius:16px;border:1px solid #cbe2e5;box-shadow:0 12px 28px #123d5520}
+@media(max-width:650px){.body-illustration{margin:14px auto 18px}.body-illustration img{aspect-ratio:16/8;object-position:center 38%;border-radius:14px}}
