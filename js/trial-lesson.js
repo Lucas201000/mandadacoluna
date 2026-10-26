@@ -97,17 +97,14 @@ if (!product) {
   root.innerHTML = `
     <a class="brand" href="vitrine.html?produto=${esc(product.slug)}"><span class="brand-mark">M</span>${PROJECT.name}</a>
     <section class="hero lesson-hero" style="--module-color:${esc(product.color)}">
-      <div>
-        <p class="lesson-eyebrow"><span class="lesson-count">${product.moduleId}</span> APRESENTAÇÃO GRATUITA</p>
+      <div class="lesson-presentation-main">
         <h1>${esc(product.name)}</h1>
+        <section class="lesson-video-card">
+          ${videoMarkup(lesson, product)}
+        </section>
       </div>
       <img class="lesson-cover" src="${esc(product.image)}" alt="Capa do ${esc(product.name)}" onerror="this.style.display='none'">
     </section>
-    <div class="lesson-layout" style="--module-color:${esc(product.color)}">
-      <section class="card lesson-video-card">
-        ${videoMarkup(lesson, product)}
-      </section>
-    </div>
     <section class="card lesson-locked" style="--module-color:${esc(product.color)};margin-top:20px">
       <p class="lesson-lock-label">🔒 PRÓXIMAS ETAPAS</p>
       <h2>Quer continuar neste módulo?</h2>
