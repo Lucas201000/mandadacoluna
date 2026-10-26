@@ -21,6 +21,8 @@
 .lesson-placeholder p { max-width: 420px; margin: 10px 0 0; color: #d6edec; }
 .lesson-play { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 50%; background: var(--aqua); color: #093447; font-weight: 700; font-size: 20px; }
 .lesson-locked { position: relative; border-top: 5px solid var(--module-color); background: linear-gradient(145deg, #fff 0, #eef9f8 100%); }
+.lesson-locked .btn { background: #b95312; box-shadow: 0 8px 18px #7f350d33; }
+.lesson-locked .btn:hover, .lesson-locked .btn:focus-visible { background: #963f0d; }
 .lesson-lock-label { display: inline-flex; gap: 8px; align-items: center; padding: 6px 10px; background: #eef6f7; border-radius: 999px; color: #38606a; font-size: 12px; font-weight: 700; }
 .lesson-list { margin: 20px 0 0; padding: 0; list-style: none; }
 .lesson-list li { padding: 11px 0 11px 28px; border-bottom: 1px solid #e4eeee; position: relative; color: var(--muted); line-height: 1.45; }

@@ -6,6 +6,14 @@ const pathProduct = Object.entries(MODULE_PRODUCTS).find(([, item]) => location.
 const moduleKey = queryModuleKey || pathProduct?.[0];
 const product = MODULE_PRODUCTS[moduleKey];
 const esc = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+const MODULE_CTA_COPY = {
+  inflamatoria: { headline: 'A dor está mais irritada? Comece pelo que o seu corpo tolera hoje.', detail: 'Você já encontrou seu ponto de partida. Agora é sua escolha começar.' },
+  muscular: { headline: 'A tensão não precisa continuar mandando na sua rotina.', detail: 'Você já identificou seu ponto de partida. Agora é sua escolha começar com mais leveza.' },
+  compressao: { headline: 'Quando a dor se espalha, segurança vem antes de intensidade.', detail: 'Você já sabe por onde começar. Agora é sua escolha avançar no seu ritmo.' },
+  rigidez: { headline: 'Seu corpo pode recuperar movimento sem precisar forçar.', detail: 'Você já encontrou o caminho. Agora é sua escolha voltar a se mover com confiança.' },
+  encurtamento: { headline: 'Ganhar liberdade de movimento começa com progressão, não com pressa.', detail: 'Você já encontrou o caminho. Agora é sua escolha começar.' },
+  instabilidade: { headline: 'Mais estabilidade na rotina começa com uma base bem construída.', detail: 'Você já tem um ponto de partida. Agora é sua escolha construir essa base.' }
+};
 
 function youtubeEmbed(url) {
   try {
@@ -94,9 +102,10 @@ if (!product) {
   root.innerHTML = `<a class="brand" href="index.html"><span class="brand-mark">M</span>${PROJECT.name}</a><section class="card"><h1>Módulo não encontrado</h1><p class="lead">Escolha um módulo na vitrine ou faça a avaliação para receber uma indicação educativa.</p><a class="btn" href="vitrine.html">Ver módulos</a></section>`;
 } else {
   const lesson = product.lesson;
+  const cta = MODULE_CTA_COPY[moduleKey];
   const moduleTitle = product.name.replace(/^Módulo\s+\d+\s*[—-]\s*/i, '');
   const checkoutAction = product.checkoutUrl
-    ? `<a class="btn" href="${esc(product.checkoutUrl)}" target="_blank" rel="noopener" id="checkout-module">Acessar o conteúdo completo</a>`
+    ? `<a class="btn" href="${esc(product.checkoutUrl)}" target="_blank" rel="noopener" id="checkout-module">QUERO COMEÇAR AGORA</a>`
     : `<div class="lesson-next-disabled"><strong>Próxima etapa em configuração.</strong><br>Assim que ela estiver liberada, este botão levará diretamente para a Aula 2.</div>`;
   root.innerHTML = `
     <a class="brand" href="vitrine.html?produto=${esc(product.slug)}"><span class="brand-mark">M</span>${PROJECT.name}</a>
@@ -111,8 +120,8 @@ if (!product) {
       ${videoMarkup(lesson, product)}
     </section>
     <section class="card lesson-locked" style="--module-color:${esc(product.color)};margin-top:20px">
-      <p class="lesson-lock-label">🔒 PRÓXIMAS ETAPAS</p>
-      <h2>Quer continuar neste módulo?</h2>
+      <h2>${esc(cta?.headline || 'Seu próximo passo começa agora.')}</h2>
+      <p class="lead">${esc(cta?.detail || 'Agora é sua escolha começar.')}</p>
       ${checkoutAction}
     </section>
     <footer class="footer"><a href="${PROJECT.privacyUrl}">Privacidade</a> · <a href="${PROJECT.termsUrl}">Termos</a> · <a href="${PROJECT.healthNoticeUrl}">Aviso de saúde</a></footer>`;
