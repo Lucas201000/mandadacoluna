@@ -15,6 +15,15 @@ const esc = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
 
 let result = loadAssessment();
 
+const MODULE_CTA_COPY = {
+  inflamatoria: 'A dor está mais irritada? Comece pelo que o seu corpo tolera hoje.',
+  muscular: 'A tensão não precisa continuar mandando na sua rotina.',
+  compressao: 'Quando a dor se espalha, segurança vem antes de intensidade.',
+  rigidez: 'Seu corpo pode recuperar movimento sem precisar forçar.',
+  encurtamento: 'Ganhar liberdade de movimento começa com progressão, não com pressa.',
+  instabilidade: 'Mais estabilidade na rotina começa com uma base bem construída.'
+};
+
 if (!result || !result.answers) {
   root.innerHTML = `
     <section class="card">
@@ -110,7 +119,8 @@ function show() {
         <p class="question-meta">SEU PRÓXIMO PASSO</p>
         <h2>${esc(product.name)}</h2>
         ${resultVideo(product)}
-        <p class="lead">Você já identificou por onde começar. Agora é sua escolha dar esse passo.</p>
+        <p class="result-cta-headline">${esc(MODULE_CTA_COPY[result.primaryModule] || 'Você já identificou por onde começar.')}</p>
+        <p class="lead">Você já identificou seu ponto de partida. Agora é sua escolha começar.</p>
         <a class="btn result-checkout" href="${esc(product.checkoutUrl)}" target="_blank" rel="noopener" id="result-checkout">QUERO COMEÇAR AGORA</a>
       </section>` : ''}
     <section class="card report-actions" id="report-actions" style="margin-top:20px">
