@@ -16,12 +16,12 @@ const esc = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
 let result = loadAssessment();
 
 const MODULE_CTA_COPY = {
-  inflamatoria: 'A dor está mais irritada? Comece pelo que o seu corpo tolera hoje.',
-  muscular: 'A tensão não precisa continuar mandando na sua rotina.',
-  compressao: 'Quando a dor se espalha, segurança vem antes de intensidade.',
-  rigidez: 'Seu corpo pode recuperar movimento sem precisar forçar.',
-  encurtamento: 'Ganhar liberdade de movimento começa com progressão, não com pressa.',
-  instabilidade: 'Mais estabilidade na rotina começa com uma base bem construída.'
+  inflamatoria: { headline: 'A dor está mais irritada? Comece pelo que o seu corpo tolera hoje.', detail: 'Você já encontrou seu ponto de partida. Agora é sua escolha começar.' },
+  muscular: { headline: 'A tensão não precisa continuar mandando na sua rotina.', detail: 'Você já identificou seu ponto de partida. Agora é sua escolha começar com mais leveza.' },
+  compressao: { headline: 'Quando a dor se espalha, segurança vem antes de intensidade.', detail: 'Você já sabe por onde começar. Agora é sua escolha avançar no seu ritmo.' },
+  rigidez: { headline: 'Seu corpo pode recuperar movimento sem precisar forçar.', detail: 'Você já encontrou o caminho. Agora é sua escolha voltar a se mover com confiança.' },
+  encurtamento: { headline: 'Ganhar liberdade de movimento começa com progressão, não com pressa.', detail: 'Você já encontrou o caminho. Agora é sua escolha começar.' },
+  instabilidade: { headline: 'Mais estabilidade na rotina começa com uma base bem construída.', detail: 'Você já tem um ponto de partida. Agora é sua escolha construir essa base.' }
 };
 
 if (!result || !result.answers) {
@@ -101,6 +101,7 @@ function show() {
   const module = MODULES[result.primaryModule];
   const product = result.recommendedProduct;
   const flagDetected = result.safety.redFlagDetected;
+  const cta = MODULE_CTA_COPY[result.primaryModule];
 
   root.innerHTML = `
     <a class="brand" href="index.html"><span class="brand-mark">M</span>${PROJECT.name}</a>
@@ -119,8 +120,8 @@ function show() {
         <p class="question-meta">SEU PRÓXIMO PASSO</p>
         <h2>${esc(product.name)}</h2>
         ${resultVideo(product)}
-        <p class="result-cta-headline">${esc(MODULE_CTA_COPY[result.primaryModule] || 'Você já identificou por onde começar.')}</p>
-        <p class="lead">Você já identificou seu ponto de partida. Agora é sua escolha começar.</p>
+        <p class="result-cta-headline">${esc(cta?.headline || 'Você já identificou por onde começar.')}</p>
+        <p class="lead">${esc(cta?.detail || 'Agora é sua escolha começar.')}</p>
         <a class="btn result-checkout" href="${esc(product.checkoutUrl)}" target="_blank" rel="noopener" id="result-checkout">QUERO COMEÇAR AGORA</a>
       </section>` : ''}
     <section class="card report-actions" id="report-actions" style="margin-top:20px">
