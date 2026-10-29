@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/mandala-da-coluna", "destination": "/index.html" },
+    { "source": "/mandala-da-coluna/", "destination": "/index.html" },
     { "source": "/modulo1", "destination": "/aula-experimental.html?modulo=inflamatoria" },
     { "source": "/modulo2", "destination": "/aula-experimental.html?modulo=muscular" },
     { "source": "/modulo3", "destination": "/aula-experimental.html?modulo=compressao" },
